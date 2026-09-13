@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Like4Like Mini App</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; background: #0f172a; color: #fff; padding: 20px; text-align: center; }
+        .card { background: #1e293b; padding: 15px; border-radius: 10px; margin-bottom: 15px; }
+        a { text-decoration: none; }
+    </style>
+</head>
+<body>
+    <h1>🔥 Like4Like Telegram App</h1>
+    <div class="card">
+        <h3>My Balance</h3>
+        <p id="balance">Loading...</p>
+    </div>
+
+    <div class="card">
+        <h3>Available Tasks</h3>
+        <div id="tasks-list">Loading tasks...</div>
+    </div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+        const telegramId = tg.initDataUnsafe?.user?.id || "123456789";
+
+        async function fetchUserData() {
+            try {
+                const res = await fetch(`/api/user/${telegramId}`);
+                const data = await res.json();
+                document.getElementById('balance').innerText = `${data.points || 0} Points`;
+            } catch (err) {
+                document.getElementById('balance').innerText = 'Error loading balance';
+            }
+        }
+
+        async function fetchTasks() {
+            try {
+                const res = await fetch(`/api/tasks/${telegramId}`);
+                const tasks = await res.json();
+                const listDiv = document.getElementById('tasks-list');
+                
+                if(!Array.isArray(tasks) || tasks.length === 0) {
+                    listDiv.innerHTML = '<p>No active tasks available right now.</p>';
+                    return;
+                }
+
+                listDiv.innerHTML = tasks.map(t => `
+                    <div style="background:#334155; padding:10px; margin:5px; border-radius:5px;">
+                        <p><b>${t.platform.toUpperCase()}</b> - ${t.taskType} (+${t.reward} pts)</p>
+                        <a href="${t.link}" target="_blank" onclick="completeTask('${t._id}')" style="color:#60a5fa;">Visit & Earn</a>
+                    </div>
+                `).join('');
+            } catch (err) {
+                document.getElementById('tasks-list').innerHTML = 'Error loading tasks';
+            }
+        }
+
+        async function completeTask(taskId) {
+            await fetch('/api/tasks/complete', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ telegramId, taskId })
+            });
+            fetchUserData();
+        }
+
+        fetchUserData();
+        fetchTasks();
+    </script>
+</body>
+</html>
