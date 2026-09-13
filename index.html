@@ -3,38 +3,120 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Like4Like Mini App</title>
+    <title>Like4Like Telegram Mini App</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body { font-family: Arial, sans-serif; background: #0f172a; color: #fff; padding: 20px; text-align: center; }
-        .card { background: #1e293b; padding: 15px; border-radius: 10px; margin-bottom: 15px; }
-        a { text-decoration: none; }
+        body { font-family: Arial, sans-serif; background: #0f172a; color: #fff; padding: 10px; margin: 0; text-align: center; }
+        .card { background: #1e293b; padding: 12px; border-radius: 10px; margin-bottom: 12px; text-align: left; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
+        .task-item { background: #334155; padding: 10px; margin: 8px 0; border-radius: 8px; }
+        .btn-group { display: flex; gap: 5px; margin-top: 8px; }
+        a.btn, button.btn { background: #3b82f6; color: white; padding: 6px 10px; border: none; border-radius: 5px; text-decoration: none; font-size: 13px; cursor: pointer; text-align: center; flex: 1; }
+        button.skip-btn { background: #ef4444; }
+        button.skip-btn:hover { background: #dc2626; }
+        input, select { width: 100%; padding: 7px; margin: 4px 0 8px 0; border-radius: 5px; border: 1px solid #475569; background: #0f172a; color: #fff; box-sizing: border-box; }
+        .tab-menu { display: flex; justify-content: space-around; background: #1e293b; padding: 8px; border-radius: 8px; margin-bottom: 12px; }
+        .tab-btn { background: none; border: none; color: #94a3b8; font-weight: bold; cursor: pointer; font-size: 14px; }
+        .tab-btn.active { color: #38bdf8; border-bottom: 2px solid #38bdf8; }
     </style>
 </head>
 <body>
-    <h1>🔥 Like4Like Telegram App</h1>
-    <div class="card">
-        <h3>My Balance</h3>
-        <p id="balance">Loading...</p>
+    <h2>🔥 Like4Like App</h2>
+
+    <!-- টাব মেনু -->
+    <div class="tab-menu">
+        <button class="tab-btn active" onclick="switchTab('earn')">Earn</button>
+        <button class="tab-btn" onclick="switchTab('add')">Add Task</button>
+        <button class="tab-btn" onclick="switchTab('profile')">Profile</button>
+        <button class="tab-btn" id="admin-menu-btn" style="display:none;" onclick="switchTab('admin')">Admin</button>
     </div>
 
-    <div class="card">
-        <h3>Available Tasks</h3>
-        <div id="tasks-list">Loading tasks...</div>
+    <!-- ১. আর্ন টাব (২ টা করে টাস্ক, স্কিপ এবং কমপ্লিট অপশন) -->
+    <div id="tab-earn" class="tab-content">
+        <div class="card" style="text-align: center;">
+            <h3>My Balance</h3>
+            <p id="balance" style="font-size: 20px; font-weight: bold; color: #38bdf8;">Loading...</p>
+        </div>
+        <div class="card">
+            <h3>📋 Available Tasks (Max 2)</h3>
+            <div id="tasks-list">Loading tasks...</div>
+        </div>
+    </div>
+
+    <!-- ২. এড টাস্ক টাব -->
+    <div id="tab-add" class="tab-content" style="display:none;">
+        <div class="card">
+            <h3>➕ Add New Campaign</h3>
+            <label>Platform:</label>
+            <select id="platform">
+                <option value="telegram">Telegram</option>
+                <option value="youtube">YouTube</option>
+            </select>
+            <label>Task Type:</label>
+            <select id="taskType">
+                <option value="Channel Join">Channel Join</option>
+                <option value="Like">Subscribe / Like</option>
+            </select>
+            <label>Link:</label>
+            <input type="text" id="taskLink" placeholder="https://t.me/...">
+            <label>Reward (Points):</label>
+            <input type="number" id="taskReward" value="10" min="5">
+            <button class="btn" onclick="createTask()" style="width: 100%; margin-top: 5px;">Create Task</button>
+        </div>
+    </div>
+
+    <!-- ৩. প্রোফাইল টাব (ইউনিক আইডি ও স্টার দিয়ে ক্রেডিট কেনা) -->
+    <div id="tab-profile" class="tab-content" style="display:none;">
+        <div class="card">
+            <h3>👤 My Profile</h3>
+            <p><b>Telegram ID:</b> <span id="profile-id" style="color: #38bdf8;"></span></p>
+            <p><b>Total Balance:</b> <span id="profile-points" style="color: #4ade80;"></span> Points</p>
+            
+            <h4 style="margin-top: 15px;">⭐ Buy Credits with Telegram Stars</h4>
+            <button class="btn" onclick="buyStars('small')" style="margin-bottom: 5px; width:100%;">Buy 100 Pts (5 Stars)</button>
+            <button class="btn" onclick="buyStars('medium')" style="margin-bottom: 5px; width:100%;">Buy 500 Pts (20 Stars)</button>
+            <button class="btn" onclick="buyStars('large')" style="width:100%;">Buy 1200 Pts (40 Stars)</button>
+        </div>
+    </div>
+
+    <!-- ৪. এডমিন প্যানেল টাব (কাউকে ফ্রি ক্রেডিট দেওয়ার জন্য) -->
+    <div id="tab-admin" class="tab-content" style="display:none;">
+        <div class="card" style="border: 1px solid #eab308;">
+            <h3 style="color: #eab308;">🛡️ Admin Panel</h3>
+            <label>Target User Telegram ID:</label>
+            <input type="text" id="targetUserId" placeholder="Enter user telegram id">
+            <label>Credit Amount:</label>
+            <input type="number" id="creditAmount" value="50">
+            <button class="btn" onclick="giveFreeCredit()" style="background: #eab308; color: #000; width: 100%; font-weight: bold; margin-top: 5px;">Give Free Credit</button>
+        </div>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
-        const telegramId = tg.initDataUnsafe?.user?.id || "123456789";
+
+        const telegramId = tg.initDataUnsafe?.user?.id ? tg.initDataUnsafe.user.id.toString() : "test_admin_123";
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById(`tab-${tabName}`).style.display = 'block';
+            event.currentTarget.classList.add('active');
+        }
 
         async function fetchUserData() {
             try {
                 const res = await fetch(`/api/user/${telegramId}`);
                 const data = await res.json();
                 document.getElementById('balance').innerText = `${data.points || 0} Points`;
+                document.getElementById('profile-points').innerText = data.points || 0;
+                document.getElementById('profile-id').innerText = data.telegramId;
+
+                // যদি ইউজার এডমিন হয়, তবে এডমিন ট্যাব শো করবে
+                if(data.isAdmin) {
+                    document.getElementById('admin-menu-btn').style.display = 'inline-block';
+                }
             } catch (err) {
-                document.getElementById('balance').innerText = 'Error loading balance';
+                console.error(err);
             }
         }
 
@@ -45,19 +127,35 @@
                 const listDiv = document.getElementById('tasks-list');
                 
                 if(!Array.isArray(tasks) || tasks.length === 0) {
-                    listDiv.innerHTML = '<p>No active tasks available right now.</p>';
+                    listDiv.innerHTML = '<p style="color:#94a3b8; text-align:center;">No tasks available right now. Check back later!</p>';
                     return;
                 }
 
+                // প্রতিবার সর্বোচ্চ ২টি টাস্ক রেন্ডার করবে এবং কমপ্লিট বা স্কিপ করলে সাথে সাথে অটো চলে যাবে
                 listDiv.innerHTML = tasks.map(t => `
-                    <div style="background:#334155; padding:10px; margin:5px; border-radius:5px;">
-                        <p><b>${t.platform.toUpperCase()}</b> - ${t.taskType} (+${t.reward} pts)</p>
-                        <a href="${t.link}" target="_blank" onclick="completeTask('${t._id}')" style="color:#60a5fa;">Visit & Earn</a>
+                    <div class="task-item">
+                        <div style="text-align: left; font-size: 13px;">
+                            <b>${t.platform.toUpperCase()}</b> - ${t.taskType}<br>
+                            <span style="color: #4ade80;">Reward: +${t.reward} pts</span>
+                        </div>
+                        <div class="btn-group">
+                            <a class="btn" href="${t.link}" target="_blank" onclick="completeTask('${t._id}')">Visit & Earn</a>
+                            <button class="btn skip-btn" onclick="skipTask('${t._id}')">Skip</button>
+                        </div>
                     </div>
                 `).join('');
             } catch (err) {
                 document.getElementById('tasks-list').innerHTML = 'Error loading tasks';
             }
+        }
+
+        async function skipTask(taskId) {
+            await fetch('/api/tasks/skip', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ telegramId, taskId })
+            });
+            fetchTasks(); // অটো রিমুভ হয়ে নতুন টাস্ক লোড হবে
         }
 
         async function completeTask(taskId) {
@@ -66,7 +164,66 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ telegramId, taskId })
             });
-            fetchUserData();
+            setTimeout(() => {
+                fetchUserData();
+                fetchTasks();
+            }, 1000);
+        }
+
+        async function createTask() {
+            const platform = document.getElementById('platform').value;
+            const taskType = document.getElementById('taskType').value;
+            const link = document.getElementById('taskLink').value;
+            const reward = document.getElementById('taskReward').value;
+
+            if(!link) { alert("Enter link!"); return; }
+
+            const res = await fetch('/api/tasks/create', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ telegramId, platform, taskType, link, reward })
+            });
+            const data = await res.json();
+            if(data.success) {
+                alert("Task created successfully!");
+                document.getElementById('taskLink').value = '';
+                fetchUserData();
+            } else {
+                alert(data.error || "Failed");
+            }
+        }
+
+        async function buyStars(packageType) {
+            const res = await fetch('/api/buy-credits', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ telegramId, packageType })
+            });
+            const data = await res.json();
+            if(data.success) {
+                alert("Credits added successfully via Telegram Stars!");
+                fetchUserData();
+            }
+        }
+
+        async function giveFreeCredit() {
+            const targetUserId = document.getElementById('targetUserId').value;
+            const amount = document.getElementById('creditAmount').value;
+
+            if(!targetUserId) { alert("Enter target user ID!"); return; }
+
+            const res = await fetch('/api/admin/give-credit', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ adminId: telegramId, targetTelegramId: targetUserId, amount })
+            });
+            const data = await res.json();
+            if(data.success) {
+                alert(`Successfully sent ${amount} points to user! New balance: ${data.newBalance}`);
+                document.getElementById('targetUserId').value = '';
+            } else {
+                alert(data.error || "Action failed");
+            }
         }
 
         fetchUserData();
