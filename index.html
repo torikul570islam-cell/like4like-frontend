@@ -12,7 +12,7 @@
         
         .menu-icon-btn { background: none; border: none; color: #fff; font-size: 22px; cursor: pointer; padding: 5px; }
         
-        .dropdown-menu { display: none; position: absolute; right: 10px; top: 45px; background: #1e293b; border: 1px solid #475569; border-radius: 8px; width: 210px; box-shadow: 0 4px 12px rgba(0,0,0,0.5); z-index: 1000; text-align: left; }
+        .dropdown-menu { display: none; position: absolute; right: 10px; top: 45px; background: #1e293b; border: 1px solid #475569; border-radius: 8px; width: 220px; box-shadow: 0 4px 12px rgba(0,0,0,0.5); z-index: 1000; text-align: left; }
         .dropdown-menu button { background: none; border: none; color: #fff; padding: 11px 15px; width: 100%; text-align: left; cursor: pointer; font-size: 14px; border-bottom: 1px solid #334155; }
         .dropdown-menu button:hover { background: #334155; color: #38bdf8; }
         .dropdown-menu button:last-child { border-bottom: none; color: #ef4444; }
@@ -34,9 +34,10 @@
         <h2>🔥 Like4Like App</h2>
         <button class="menu-icon-btn" onclick="toggleMenu()">⋮</button>
         
-        <!-- ড্রপডাউন মেনু (বোনাস বাটন বাদ দেওয়া হয়েছে) -->
+        <!-- ড্রপডাউন মেনু -->
         <div id="dropdownMenu" class="dropdown-menu">
             <button onclick="switchTab('add'); toggleMenu();">⚙️ Add/Manage Pages</button>
+            <button onclick="switchTab('my-tasks'); toggleMenu();">📋 My Tasks (History)</button>
             <button onclick="switchTab('free-credits'); toggleMenu();">🪙 Free Credits</button>
             <button onclick="switchTab('profile'); toggleMenu();">🛒 Buy Credits</button>
             <button onclick="switchTab('free-credits'); toggleMenu();">🏷️ Special Offers</button>
@@ -46,10 +47,11 @@
         </div>
     </div>
 
-    <!-- মূল ট্যাব মেনুবার (বোনাস ট্যাব বাদ দেওয়া হয়েছে) -->
+    <!-- মূল ট্যাব মেনুবার -->
     <div class="tab-menu">
         <button class="tab-btn active" onclick="switchTab('earn')">Earn</button>
         <button class="tab-btn" onclick="switchTab('add')">Add Task</button>
+        <button class="tab-btn" onclick="switchTab('my-tasks')">My Tasks</button>
         <button class="tab-btn" onclick="switchTab('free-credits')">Free Credits</button>
         <button class="tab-btn" onclick="switchTab('profile')">Profile</button>
     </div>
@@ -61,7 +63,7 @@
             <p id="balance" style="font-size: 20px; font-weight: bold; color: #38bdf8;">Loading...</p>
         </div>
         <div class="card">
-            <h3>📋 Available Tasks (Max 2)</h3>
+            <h3>📋 Available Tasks</h3>
             <div id="tasks-list">Loading tasks...</div>
         </div>
     </div>
@@ -108,9 +110,16 @@
         </div>
     </div>
 
-    <!-- ৩. ফ্রি ক্রেডিট ট্যাব (এখানে ডেইলি লগইন বোনাস এবং নিচে রেফারেল প্রোগ্রাম সেট করা হয়েছে) -->
+    <!-- ৩. মাই টাস্কস ট্যাব (টাস্ক হিস্ট্রি ও ডিলিট অপশন) -->
+    <div id="tab-my-tasks" class="tab-content" style="display:none;">
+        <div class="card">
+            <h3 style="color: #38bdf8; text-align: center; margin-bottom: 12px;">📋 My Created Tasks</h3>
+            <div id="my-tasks-list">Loading your tasks...</div>
+        </div>
+    </div>
+
+    <!-- ৪. ফ্রি ক্রেডিট ট্যাব -->
     <div id="tab-free-credits" class="tab-content" style="display:none;">
-        <!-- ডেইলি লগইন বোনাস সেকশন -->
         <div class="card" style="text-align: center;">
             <h3 style="color: #38bdf8;">🪙 Daily Login Bonus</h3>
             <p style="color: #94a3b8; font-size: 14px;">Claim your daily login bonus of 5 free points every 24 hours!</p>
@@ -120,7 +129,6 @@
             </div>
         </div>
 
-        <!-- রেফারেল প্রোগ্রাম ও বোনাস সেকশন (ডেইলি লগইন বোনাসের নিচে সেট করা) -->
         <div class="card" style="text-align: center; margin-top: 15px;">
             <h3 style="color: #38bdf8;">👥 Referral Program & Bonuses</h3>
             <p style="color: #94a3b8; font-size: 14px;">Invite friends and get <b>50 Credit Bonus</b> per referral!</p>
@@ -133,7 +141,7 @@
         </div>
     </div>
 
-    <!-- ৪. প্রোফাইল ট্যাব -->
+    <!-- ৫. প্রোফাইল ট্যাব -->
     <div id="tab-profile" class="tab-content" style="display:none;">
         <div class="card">
             <h3>👤 My Profile</h3>
@@ -175,7 +183,7 @@
         </div>
     </div>
 
-    <!-- ৫. এডমিন প্যানেল ট্যাব -->
+    <!-- ৬. এডমিন প্যানেল ট্যাব -->
     <div id="tab-admin" class="tab-content" style="display:none;">
         <div class="card" style="border: 1px solid #eab308;">
             <h3 style="color: #eab308;">🛡️ Admin Panel</h3>
@@ -235,6 +243,10 @@
             
             const target = document.getElementById(`tab-${tabName}`);
             if(target) target.style.display = 'block';
+
+            if(tabName === 'my-tasks') {
+                fetchMyTasks();
+            }
             
             document.querySelectorAll('.tab-btn').forEach(el => {
                 if(el.getAttribute('onclick')?.includes(`'${tabName}'`)) {
@@ -273,7 +285,7 @@
                 document.getElementById('profile-id').innerText = data.telegramId;
                 document.getElementById('ref-count').innerText = data.referralCount || 0;
 
-                const botUsername = "YourActualBotName"; 
+                const botUsername = "sub4subtetris_bot"; 
                 document.getElementById('referral-link').value = `https://t.me/${botUsername}?start=${telegramId}`;
 
                 if (data.password && data.password !== "") {
@@ -361,20 +373,48 @@
                 }
 
                 listDiv.innerHTML = tasks.map(t => `
-                    <div class="task-item">
-                        <div style="text-align: left; font-size: 13px;">
+                    <div class="task-item" id="task-card-${t._id}">
+                        <div style="text-align: left; font-size: 13px; margin-bottom: 8px;">
                             <b>${t.platform.toUpperCase()}</b> - ${t.taskType}<br>
                             <span style="color: #4ade80;">Reward: +${t.reward} pts</span>
                         </div>
-                        <div class="btn-group">
-                            <a class="btn" href="${t.link}" target="_blank" onclick="completeTask('${t._id}')">Visit & Earn</a>
+                        <div class="btn-group" id="btn-group-${t._id}">
+                            <a class="btn" href="${t.link}" target="_blank" onclick="startTaskTimer('${t._id}')">Visit Link</a>
                             <button class="btn skip-btn" onclick="skipTask('${t._id}')">Skip</button>
+                        </div>
+                        <div id="timer-container-${t._id}" style="margin-top: 8px; display: none; text-align: center;">
+                            <span id="timer-text-${t._id}" style="font-size: 12px; color: #eab308; display: block; margin-bottom: 5px;"></span>
+                            <button class="btn" id="verify-btn-${t._id}" onclick="completeTask('${t._id}')" style="background: #10b981; display: none; width: 100%;">Verify & Claim</button>
                         </div>
                     </div>
                 `).join('');
             } catch (err) {
                 document.getElementById('tasks-list').innerHTML = 'Error loading tasks';
             }
+        }
+
+        function startTaskTimer(taskId) {
+            const btnGroup = document.getElementById(`btn-group-${taskId}`);
+            const timerContainer = document.getElementById(`timer-container-${taskId}`);
+            const timerText = document.getElementById(`timer-text-${taskId}`);
+            const verifyBtn = document.getElementById(`verify-btn-${taskId}`);
+
+            btnGroup.style.display = 'none';
+            timerContainer.style.display = 'block';
+
+            let timeLeft = 6;
+            timerText.innerText = `Please wait ${timeLeft} seconds on the task page...`;
+
+            let countdown = setInterval(() => {
+                timeLeft--;
+                if (timeLeft > 0) {
+                    timerText.innerText = `Please wait ${timeLeft} seconds on the task page...`;
+                } else {
+                    clearInterval(countdown);
+                    timerText.innerText = "Time's up! Click below to verify:";
+                    verifyBtn.style.display = 'block';
+                }
+            }, 1000);
         }
 
         async function skipTask(taskId) {
@@ -387,15 +427,70 @@
         }
 
         async function completeTask(taskId) {
-            await fetch(`${SERVER_URL}/api/tasks/complete`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ telegramId, taskId })
-            });
-            setTimeout(() => {
-                fetchUserData();
-                fetchTasks();
-            }, 1000);
+            try {
+                const res = await fetch(`${SERVER_URL}/api/tasks/complete`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ telegramId, taskId })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    alert("Task verified & points added successfully!");
+                    fetchUserData();
+                    fetchTasks();
+                } else {
+                    alert(data.error || "Failed to complete task");
+                    fetchTasks();
+                }
+            } catch (err) {
+                alert("Server connection error!");
+            }
+        }
+
+        async function fetchMyTasks() {
+            try {
+                const res = await fetch(`${SERVER_URL}/api/my-tasks/${telegramId}`);
+                const tasks = await res.json();
+                const listDiv = document.getElementById('my-tasks-list');
+                
+                if(!Array.isArray(tasks) || tasks.length === 0) {
+                    listDiv.innerHTML = '<p style="color:#94a3b8; text-align:center;">You have not created any tasks yet.</p>';
+                    return;
+                }
+
+                listDiv.innerHTML = tasks.map(t => `
+                    <div class="task-item" style="display: flex; justify-content: space-between; align-items: center;">
+                        <div style="text-align: left; font-size: 12px; width: 70%;">
+                            <b>${t.platform.toUpperCase()}</b> - ${t.taskType}<br>
+                            <span style="color: #38bdf8; word-break: break-all;">${t.link}</span><br>
+                            <span style="color: #4ade80;">Reward: ${t.reward} pts</span>
+                        </div>
+                        <div>
+                            <button class="btn skip-btn" onclick="deleteMyTask('${t._id}')" style="padding: 5px 10px; font-size: 11px;">Delete</button>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (err) {
+                document.getElementById('my-tasks-list').innerHTML = 'Error loading your tasks';
+            }
+        }
+
+        async function deleteMyTask(taskId) {
+            if(!confirm("Are you sure you want to delete this task?")) return;
+            try {
+                const res = await fetch(`${SERVER_URL}/api/tasks/delete/${taskId}`, {
+                    method: 'DELETE'
+                });
+                const data = await res.json();
+                if(data.success) {
+                    alert("Task deleted successfully!");
+                    fetchMyTasks();
+                } else {
+                    alert("Failed to delete task");
+                }
+            } catch (err) {
+                alert("Server connection error!");
+            }
         }
 
         async function claimDailyBonus() {
