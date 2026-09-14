@@ -34,25 +34,23 @@
         <h2>🔥 Like4Like App</h2>
         <button class="menu-icon-btn" onclick="toggleMenu()">⋮</button>
         
-        <!-- ড্রপডাউন মেনু -->
+        <!-- ড্রপডাউন মেনু (বোনাস বাটন বাদ দেওয়া হয়েছে) -->
         <div id="dropdownMenu" class="dropdown-menu">
             <button onclick="switchTab('add'); toggleMenu();">⚙️ Add/Manage Pages</button>
             <button onclick="switchTab('free-credits'); toggleMenu();">🪙 Free Credits</button>
             <button onclick="switchTab('profile'); toggleMenu();">🛒 Buy Credits</button>
             <button onclick="switchTab('free-credits'); toggleMenu();">🏷️ Special Offers</button>
-            <button onclick="switchTab('bonuses'); toggleMenu();">⭐ Bonuses</button>
             <button onclick="switchTab('profile'); toggleMenu();">👤 Profile</button>
             <button id="admin-dropdown-btn" style="display:none;" onclick="switchTab('admin'); toggleMenu();">🛡️ Admin Panel</button>
             <button onclick="logoutUser(); toggleMenu();">🚪 Logout</button>
         </div>
     </div>
 
-    <!-- মূল ট্যাব মেনুবার -->
+    <!-- মূল ট্যাব মেনুবার (বোনাস ট্যাব বাদ দেওয়া হয়েছে) -->
     <div class="tab-menu">
         <button class="tab-btn active" onclick="switchTab('earn')">Earn</button>
         <button class="tab-btn" onclick="switchTab('add')">Add Task</button>
         <button class="tab-btn" onclick="switchTab('free-credits')">Free Credits</button>
-        <button class="tab-btn" onclick="switchTab('bonuses')">Bonuses</button>
         <button class="tab-btn" onclick="switchTab('profile')">Profile</button>
     </div>
 
@@ -110,8 +108,9 @@
         </div>
     </div>
 
-    <!-- ৩. ফ্রি ক্রেডিট ট্যাব (ডেইলি লগইন বোনাস) -->
+    <!-- ৩. ফ্রি ক্রেডিট ট্যাব (এখানে ডেইলি লগইন বোনাস এবং নিচে রেফারেল প্রোগ্রাম সেট করা হয়েছে) -->
     <div id="tab-free-credits" class="tab-content" style="display:none;">
+        <!-- ডেইলি লগইন বোনাস সেকশন -->
         <div class="card" style="text-align: center;">
             <h3 style="color: #38bdf8;">🪙 Daily Login Bonus</h3>
             <p style="color: #94a3b8; font-size: 14px;">Claim your daily login bonus of 5 free points every 24 hours!</p>
@@ -120,11 +119,9 @@
                 <button class="btn" onclick="claimDailyBonus()" style="background: #10b981; font-weight: bold; width: 100%; padding: 10px;">Claim 5 Points Bonus</button>
             </div>
         </div>
-    </div>
 
-    <!-- ৪. বোনাসেস ট্যাব (রেফারেল প্রোগ্রাম ও বোনাস ইনফো) -->
-    <div id="tab-bonuses" class="tab-content" style="display:none;">
-        <div class="card" style="text-align: center;">
+        <!-- রেফারেল প্রোগ্রাম ও বোনাস সেকশন (ডেইলি লগইন বোনাসের নিচে সেট করা) -->
+        <div class="card" style="text-align: center; margin-top: 15px;">
             <h3 style="color: #38bdf8;">👥 Referral Program & Bonuses</h3>
             <p style="color: #94a3b8; font-size: 14px;">Invite friends and get <b>50 Credit Bonus</b> per referral!</p>
             <div style="background: #334155; padding: 12px; border-radius: 8px; margin: 10px 0; text-align: left;">
@@ -132,11 +129,11 @@
                 <input type="text" id="referral-link" readonly style="background: #1e293b; color: #38bdf8; font-size: 12px;" value="Loading...">
                 <button class="btn" onclick="copyReferralLink()" style="background: #3b82f6; width: 100%; margin-top: 5px; font-weight: bold;">📋 Copy Referral Link</button>
             </div>
-            <p style="font-size: 13px; color: #cbd5e1;">Total Referrals: <span id="ref-count" style="color: #4ade80; font-weight: bold;">0</span></p>
+            <p style="font-size: 13px; color: #cbd5e1; margin-bottom: 0;">Total Referrals: <span id="ref-count" style="color: #4ade80; font-weight: bold;">0</span></p>
         </div>
     </div>
 
-    <!-- ৫. প্রোফাইল ট্যাব -->
+    <!-- ৪. প্রোফাইল ট্যাব -->
     <div id="tab-profile" class="tab-content" style="display:none;">
         <div class="card">
             <h3>👤 My Profile</h3>
@@ -178,7 +175,7 @@
         </div>
     </div>
 
-    <!-- ৬. এডমিন প্যানেল ট্যাব -->
+    <!-- ৫. এডমিন প্যানেল ট্যাব -->
     <div id="tab-admin" class="tab-content" style="display:none;">
         <div class="card" style="border: 1px solid #eab308;">
             <h3 style="color: #eab308;">🛡️ Admin Panel</h3>
