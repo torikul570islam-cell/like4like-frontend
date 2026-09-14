@@ -34,7 +34,7 @@
         <h2>🔥 Like4Like App</h2>
         <button class="menu-icon-btn" onclick="toggleMenu()">⋮</button>
         
-        <!-- ড্রপডাউন মেনু: এখানে সরাসরি ট্যাব সুইচ ফাংশন দেওয়া হয়েছে -->
+        <!-- ড্রপডাউন মেনু -->
         <div id="dropdownMenu" class="dropdown-menu">
             <button onclick="switchTab('add'); toggleMenu();">⚙️ Add/Manage Pages</button>
             <button onclick="switchTab('free-credits'); toggleMenu();">🪙 Free Credits</button>
@@ -109,7 +109,7 @@
         </div>
     </div>
 
-    <!-- ৩. ফ্রি ক্রেডিট ট্যাব (শুধুমাত্র ডেইলি লগইন বোনাস) -->
+    <!-- ৩. ফ্রি ক্রেডিট ট্যাব -->
     <div id="tab-free-credits" class="tab-content" style="display:none;">
         <div class="card" style="text-align: center;">
             <h3 style="color: #38bdf8;">🪙 Daily Login Bonus</h3>
@@ -121,7 +121,7 @@
         </div>
     </div>
 
-    <!-- ৪. বোনাসেস ট্যাব (শুধুমাত্র রেফারেল সিস্টেম) -->
+    <!-- ৪. বোনাসেস ট্যাব -->
     <div id="tab-bonuses" class="tab-content" style="display:none;">
         <div class="card" style="text-align: center;">
             <h3 style="color: #38bdf8;">👥 Referral Program & Bonuses</h3>
@@ -239,7 +239,8 @@
         }
 
         function openSpecialOffers() {
-            alert("No special offers right now. Stay tuned!");
+            // অ্যালার্ট রিমুভ করে সরাসরি বোনাস ট্যাবে পাঠিয়ে দেওয়া হলো
+            switchTab('bonuses');
         }
 
         function logoutUser() {
@@ -273,7 +274,6 @@
                 document.getElementById('profile-id').innerText = data.telegramId;
                 document.getElementById('ref-count').innerText = data.referralCount || 0;
 
-                // ⚠️ আপনার আসল টেলিগ্রাম বটের ইউজারনেমটি এখানে বসিয়ে দিন (যেমন: "YourActualBotName")
                 const botUsername = "YourActualBotName"; 
                 document.getElementById('referral-link').value = `https://t.me/${botUsername}?start=${telegramId}`;
 
