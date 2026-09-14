@@ -86,7 +86,7 @@
         </div>
     </div>
 
-    <!-- ৩. প্রোফাইল ট্যাব (পাসওয়ার্ড সেট/পরিবর্তন অপশন সহ) -->
+    <!-- ৩. প্রোফাইল ট্যাব -->
     <div id="tab-profile" class="tab-content" style="display:none;">
         <div class="card">
             <h3>👤 My Profile</h3>
@@ -126,7 +126,6 @@
     </div>
 
     <script>
-        // ব্যাকএন্ড সার্ভারের বেস ইউআরএল
         const SERVER_URL = "https://telegram-mini-app-8y39.onrender.com";
 
         const tg = window.Telegram.WebApp;
@@ -306,16 +305,33 @@
             }
         }
 
+        // টেলিগ্রাম স্টার পেমেন্ট ইনভয়েস ওপেন করার আপডেট করা ফাংশন
         async function buyStars(packageType) {
-            const res = await fetch(`${SERVER_URL}/api/buy-credits`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ telegramId, packageType })
-            });
-            const data = await res.json();
-            if(data.success) {
-                alert("Credits added successfully!");
-                fetchUserData();
+            try {
+                const res = await fetch(`${SERVER_URL}/api/create-invoice`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ telegramId, packageType })
+                });
+                const data = await res.json();
+                
+                if (data.success && data.invoiceLink) {
+                    tg.openInvoice(data.invoiceLink, async (status) => {
+                        if (status === 'paid') {
+                            alert("Payment successful! Points will be added shortly.");
+                            setTimeout(() => fetchUserData(), 2000);
+                        } else if (status === 'cancelled') {
+                            alert("Payment cancelled.");
+                        } else {
+                            alert("Payment failed or status unknown.");
+                        }
+                    });
+                } else {
+                    alert(data.error || "Failed to create invoice");
+                }
+            } catch (err) {
+                console.error(err);
+                alert("Server connection error!");
             }
         }
 
