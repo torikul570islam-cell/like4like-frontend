@@ -64,20 +64,23 @@
         </div>
     </div>
 
-    <!-- ২. এড টাস্ক ট্যাব (Like4Like Style) -->
+    <!-- ২. এড টাস্ক ট্যাব (Like4Like Style + Custom More Option) -->
     <div id="tab-add" class="tab-content" style="display:none;">
         <div class="card">
             <h3 style="text-align: center; margin-bottom: 15px; color: #38bdf8;">📊 Add New Promotion</h3>
             
-            <!-- সোশ্যাল মিডিয়া বাটন লিস্ট -->
+            <!-- সোশ্যাল মিডিয়া ও কাস্টম অপশন বাটন লিস্ট -->
             <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 15px;">
                 <button class="btn" style="background: #334155; text-align: left; padding: 10px;" onclick="selectPlatform('telegram', 'Channel Join')">📢 Telegram Channel Join</button>
+                <button class="btn" style="background: #334155; text-align: left; padding: 10px;" onclick="selectPlatform('youtube', 'YouTube Subscribe')">🔴 YouTube Subscribe</button>
+                <button class="btn" style="background: #334155; text-align: left; padding: 10px;" onclick="selectPlatform('youtube', 'YouTube Like')">👍 YouTube Like</button>
                 <button class="btn" style="background: #334155; text-align: left; padding: 10px;" onclick="selectPlatform('instagram', 'Instagram Likes')">👍 Instagram Likes</button>
                 <button class="btn" style="background: #334155; text-align: left; padding: 10px;" onclick="selectPlatform('instagram', 'Instagram Followers')">👥 Instagram Followers</button>
                 <button class="btn" style="background: #334155; text-align: left; padding: 10px;" onclick="selectPlatform('tiktok', 'TikTok Likes')">❤️ TikTok Likes</button>
                 <button class="btn" style="background: #334155; text-align: left; padding: 10px;" onclick="selectPlatform('tiktok', 'TikTok Followers')">👥 TikTok Followers</button>
                 <button class="btn" style="background: #334155; text-align: left; padding: 10px;" onclick="selectPlatform('facebook', 'Facebook Likes')">👍 Facebook Likes</button>
                 <button class="btn" style="background: #334155; text-align: left; padding: 10px;" onclick="selectPlatform('facebook', 'Facebook Followers')">👥 Facebook Followers</button>
+                <button class="btn" style="background: #475569; text-align: left; padding: 10px; font-weight: bold; color: #eab308;" onclick="selectMoreOption()">➕ More Option (Custom Name)</button>
             </div>
 
             <hr style="border-color: #334155; margin: 15px 0;">
@@ -86,11 +89,17 @@
             <div id="campaign-form" style="background: #0f172a; padding: 12px; border-radius: 8px; border: 1px solid #475569;">
                 <p style="margin-top:0;"><b>Selected Type:</b> <span id="selected-type" style="color: #4ade80;">TELEGRAM - Channel Join</span></p>
                 
+                <!-- কাস্টম অপশনের জন্য ইনপুট বক্স (ডিফল্টভাবে হাইড থাকবে) -->
+                <div id="custom-option-container" style="display:none; margin-bottom: 8px;">
+                    <label style="color: #eab308;">Custom Option / Platform Name:</label>
+                    <input type="text" id="customTaskName" placeholder="e.g. Twitter Follow, Website Visit">
+                </div>
+
                 <input type="hidden" id="platform" value="telegram">
                 <input type="hidden" id="taskType" value="Channel Join">
 
                 <label>Target Link / URL:</label>
-                <input type="text" id="taskLink" placeholder="https://t.me/your_channel">
+                <input type="text" id="taskLink" placeholder="https://...">
 
                 <label>Reward per action (Points):</label>
                 <input type="number" id="taskReward" value="10" min="5">
@@ -174,11 +183,20 @@
             window.location.href = "login.html";
         }
 
-        // প্ল্যাটফর্ম সিলেকশন হ্যান্ডলার
+        // সাধারণ প্ল্যাটফর্ম সিলেকশন হ্যান্ডলার
         function selectPlatform(plat, type) {
+            document.getElementById('custom-option-container').style.display = 'none';
             document.getElementById('platform').value = plat;
             document.getElementById('taskType').value = type;
             document.getElementById('selected-type').innerText = `${plat.toUpperCase()} - ${type}`;
+        }
+
+        // মোর অপশন হ্যান্ডলার (কাস্টম নাম লেখার বক্স দেখাবে)
+        function selectMoreOption() {
+            document.getElementById('custom-option-container').style.display = 'block';
+            document.getElementById('platform').value = 'custom';
+            document.getElementById('taskType').value = 'Custom Task';
+            document.getElementById('selected-type').innerText = `CUSTOM OPTION`;
         }
 
         async function fetchUserData() {
@@ -304,10 +322,21 @@
         }
 
         async function createTask() {
-            const platform = document.getElementById('platform').value;
-            const taskType = document.getElementById('taskType').value;
+            let platform = document.getElementById('platform').value;
+            let taskType = document.getElementById('taskType').value;
             const link = document.getElementById('taskLink').value;
             const reward = document.getElementById('taskReward').value;
+
+            // যদি মোর অপশন সিলেক্ট করা থাকে, তবে কাস্টম ইনপুট থেকে নাম নিয়ে নেব
+            if (platform === 'custom') {
+                const customName = document.getElementById('customTaskName').value.trim();
+                if (!customName) {
+                    alert("Please enter a custom task name!");
+                    return;
+                }
+                platform = "Custom";
+                taskType = customName;
+            }
 
             if(!link) { alert("Enter link!"); return; }
 
@@ -320,6 +349,9 @@
             if(data.success) {
                 alert("Task created successfully!");
                 document.getElementById('taskLink').value = '';
+                if(document.getElementById('customTaskName')) {
+                    document.getElementById('customTaskName').value = '';
+                }
                 fetchUserData();
             } else {
                 alert(data.error || "Failed");
