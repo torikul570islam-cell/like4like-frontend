@@ -199,7 +199,6 @@
         const telegramId = tg.initDataUnsafe?.user?.id ? tg.initDataUnsafe.user.id.toString() : (localStorage.getItem('telegramId') || "test_admin_123");
         let hasPasswordSet = false;
 
-        // ইউজার লগইন করার সময় বা পেজ লোড হলে রেফারেল বাই ডেটা সার্ভারে পাঠানোর ব্যবস্থা
         async function registerUserWithReferral() {
             const referredBy = localStorage.getItem('referredBy') || null;
             try {
@@ -265,8 +264,8 @@
                 document.getElementById('profile-id').innerText = data.telegramId;
                 document.getElementById('ref-count').innerText = data.referralCount || 0;
 
-                // বটের ইউজারনেম দিয়ে ডায়নামিক রেফারেল লিঙ্ক তৈরি
-                const botUsername = "YourBotUsername"; // আপনার টেলিগ্রাম বটের ইউজারনেম এখানে দিন (@ ছাড়া)
+                // ⚠️ এখানে আপনার আসল টেলিগ্রাম বটের ইউজারনেম বসিয়ে দিন (যেমন: YourActualBotName)
+                const botUsername = "YourActualBotName"; 
                 document.getElementById('referral-link').value = `https://t.me/${botUsername}?start=${telegramId}`;
 
                 if (data.password && data.password !== "") {
@@ -536,7 +535,6 @@
             }
         }
 
-        // ইনিশিয়ালাইজেশন
         async function initApp() {
             await registerUserWithReferral();
             await fetchUserData();
