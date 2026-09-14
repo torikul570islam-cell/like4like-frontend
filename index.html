@@ -264,6 +264,7 @@
                 document.getElementById('profile-id').innerText = data.telegramId;
                 document.getElementById('ref-count').innerText = data.referralCount || 0;
 
+                // ⚠️ আপনার আসল টেলিগ্রাম বটের ইউজারনেমটি এখানে বসিয়ে দিন (যেমন: "YourActualBotName")
                 const botUsername = "YourActualBotName"; 
                 document.getElementById('referral-link').value = `https://t.me/${botUsername}?start=${telegramId}`;
 
