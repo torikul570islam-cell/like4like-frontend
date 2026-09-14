@@ -42,7 +42,7 @@
             <button onclick="alert('Bonuses are active!'); toggleMenu();">⭐ Bonuses</button>
             <button onclick="switchTab('profile'); toggleMenu();">👤 Profile</button>
             <button id="admin-dropdown-btn" style="display:none;" onclick="switchTab('admin'); toggleMenu();">🛡️ Admin Panel</button>
-            <button onclick="alert('Logged out session.'); toggleMenu();">🚪 Logout</button>
+            <button onclick="logoutUser(); toggleMenu();">🚪 Logout</button>
         </div>
     </div>
 
@@ -129,7 +129,8 @@
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        const telegramId = tg.initDataUnsafe?.user?.id ? tg.initDataUnsafe.user.id.toString() : "test_admin_123";
+        // টেলিগ্রাম থেকে আইডি নিবে, না থাকলে লোকালস্টোরেজ বা টেস্ট আইডি ব্যবহার করবে
+        const telegramId = tg.initDataUnsafe?.user?.id ? tg.initDataUnsafe.user.id.toString() : (localStorage.getItem('telegramId') || "test_admin_123");
         let hasPasswordSet = false;
 
         function toggleMenu() {
@@ -150,6 +151,12 @@
             document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
             document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
             document.getElementById(`tab-${tabName}`).style.display = 'block';
+        }
+
+        function logoutUser() {
+            localStorage.removeItem('telegramId');
+            alert("Logged out successfully!");
+            window.location.href = "login.html";
         }
 
         async function fetchUserData() {
