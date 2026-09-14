@@ -109,7 +109,7 @@
         </div>
     </div>
 
-    <!-- ৩. ফ্রি ক্রেডিট ট্যাব -->
+    <!-- ৩. ফ্রি ক্রেডিট ট্যাব (এখানেই ডেইলি লগইন বোনাস রাখা হয়েছে) -->
     <div id="tab-free-credits" class="tab-content" style="display:none;">
         <div class="card" style="text-align: center;">
             <h3 style="color: #38bdf8;">🪙 Daily Login Bonus</h3>
@@ -121,7 +121,7 @@
         </div>
     </div>
 
-    <!-- ৪. বোনাসেস ট্যাব -->
+    <!-- ৪. বোনাসেস ট্যাব (এখানে শুধু রেফারেল প্রোগ্রাম থাকবে) -->
     <div id="tab-bonuses" class="tab-content" style="display:none;">
         <div class="card" style="text-align: center;">
             <h3 style="color: #38bdf8;">👥 Referral Program & Bonuses</h3>
@@ -239,14 +239,13 @@
         }
 
         function openSpecialOffers() {
-            // অ্যালার্ট রিমুভ করে সরাসরি বোনাস ট্যাবে পাঠিয়ে দেওয়া হলো
-            switchTab('bonuses');
+            // স্পেশাল অফারসে ক্লিক করলে এটি ফ্রি ক্রেডিট বা অন্য কোনো নির্দিষ্ট ট্যাবে নিয়ে যেতে পারে, কোনো অ্যালার্ট দেখাবে না
+            switchTab('free-credits');
         }
 
         function logoutUser() {
             localStorage.removeItem('telegramId');
             localStorage.removeItem('referredBy');
-            alert("Logged out successfully!");
             window.location.href = "login.html";
         }
 
