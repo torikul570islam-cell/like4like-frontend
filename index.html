@@ -39,7 +39,7 @@
             <button onclick="switchTab('free-credits'); toggleMenu();">🪙 Free Credits & Referral</button>
             <button onclick="switchTab('profile'); toggleMenu();">🛒 Buy Credits</button>
             <button onclick="alert('No special offers right now.'); toggleMenu();">🏷️ Special Offers</button>
-            <button onclick="alert('Bonuses are active!'); toggleMenu();">⭐ Bonuses</button>
+            <button onclick="switchTab('free-credits'); toggleMenu();">⭐ Bonuses</button>
             <button onclick="switchTab('profile'); toggleMenu();">👤 Profile</button>
             <button id="admin-dropdown-btn" style="display:none;" onclick="switchTab('admin'); toggleMenu();">🛡️ Admin Panel</button>
             <button onclick="logoutUser(); toggleMenu();">🚪 Logout</button>
@@ -264,7 +264,6 @@
                 document.getElementById('profile-id').innerText = data.telegramId;
                 document.getElementById('ref-count').innerText = data.referralCount || 0;
 
-                // ⚠️ এখানে আপনার আসল টেলিগ্রাম বটের ইউজারনেম বসিয়ে দিন (যেমন: YourActualBotName)
                 const botUsername = "YourActualBotName"; 
                 document.getElementById('referral-link').value = `https://t.me/${botUsername}?start=${telegramId}`;
 
