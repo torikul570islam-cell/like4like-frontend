@@ -24,7 +24,7 @@
         button.skip-btn { background: #ef4444; }
         input, select { width: 100%; padding: 7px; margin: 4px 0 8px 0; border-radius: 5px; border: 1px solid #475569; background: #0f172a; color: #fff; box-sizing: border-box; }
         .tab-menu { display: flex; justify-content: space-around; background: #1e293b; padding: 8px; border-radius: 8px; margin-bottom: 12px; }
-        .tab-btn { background: none; border: none; color: #94a3b8; font-weight: bold; cursor: pointer; font-size: 14px; }
+        .tab-btn { background: none; border: none; color: #94a3b8; font-weight: bold; cursor: pointer; font-size: 13px; }
         .tab-btn.active { color: #38bdf8; border-bottom: 2px solid #38bdf8; }
     </style>
 </head>
@@ -39,7 +39,7 @@
             <button onclick="switchTab('free-credits'); toggleMenu();">🪙 Free Credits</button>
             <button onclick="switchTab('profile'); toggleMenu();">🛒 Buy Credits</button>
             <button onclick="openSpecialOffers(); toggleMenu();">🏷️ Special Offers</button>
-            <button onclick="openBonusesAlert(); toggleMenu();">⭐ Bonuses</button>
+            <button onclick="switchTab('bonuses'); toggleMenu();">⭐ Bonuses</button>
             <button onclick="switchTab('profile'); toggleMenu();">👤 Profile</button>
             <button id="admin-dropdown-btn" style="display:none;" onclick="switchTab('admin'); toggleMenu();">🛡️ Admin Panel</button>
             <button onclick="logoutUser(); toggleMenu();">🚪 Logout</button>
@@ -49,7 +49,8 @@
     <div class="tab-menu">
         <button class="tab-btn active" onclick="switchTab('earn')">Earn</button>
         <button class="tab-btn" onclick="switchTab('add')">Add Task</button>
-        <button class="tab-btn" onclick="switchTab('free-credits')">Referral</button>
+        <button class="tab-btn" onclick="switchTab('free-credits')">Free Credits</button>
+        <button class="tab-btn" onclick="switchTab('bonuses')">Bonuses</button>
         <button class="tab-btn" onclick="switchTab('profile')">Profile</button>
     </div>
 
@@ -107,7 +108,7 @@
         </div>
     </div>
 
-    <!-- ৩. ফ্রি ক্রেডিট ও রেফারেল ট্যাব -->
+    <!-- ৩. ফ্রি ক্রেডিট ট্যাব (শুধুমাত্র ডেইলি লগইন বোনাস) -->
     <div id="tab-free-credits" class="tab-content" style="display:none;">
         <div class="card" style="text-align: center;">
             <h3 style="color: #38bdf8;">🪙 Daily Login Bonus</h3>
@@ -117,9 +118,12 @@
                 <button class="btn" onclick="claimDailyBonus()" style="background: #10b981; font-weight: bold; width: 100%; padding: 10px;">Claim 5 Points Bonus</button>
             </div>
         </div>
+    </div>
 
+    <!-- ৪. বোনাসেস ট্যাব (শুধুমাত্র রেফারেল সিস্টেম) -->
+    <div id="tab-bonuses" class="tab-content" style="display:none;">
         <div class="card" style="text-align: center;">
-            <h3 style="color: #38bdf8;">👥 Referral Program</h3>
+            <h3 style="color: #38bdf8;">👥 Referral Program & Bonuses</h3>
             <p style="color: #94a3b8; font-size: 14px;">Invite friends and earn points & commission!</p>
             <div style="background: #334155; padding: 12px; border-radius: 8px; margin: 10px 0; text-align: left;">
                 <label style="font-size: 12px; color: #cbd5e1;">Your Referral Link:</label>
@@ -130,7 +134,7 @@
         </div>
     </div>
 
-    <!-- ৪. প্রোফাইল ট্যাব -->
+    <!-- ৫. প্রোফাইল ট্যাব -->
     <div id="tab-profile" class="tab-content" style="display:none;">
         <div class="card">
             <h3>👤 My Profile</h3>
@@ -172,7 +176,7 @@
         </div>
     </div>
 
-    <!-- ৫. এডমিন প্যানেল ট্যাব -->
+    <!-- ৬. এডমিন প্যানেল ট্যাব -->
     <div id="tab-admin" class="tab-content" style="display:none;">
         <div class="card" style="border: 1px solid #eab308;">
             <h3 style="color: #eab308;">🛡️ Admin Panel</h3>
@@ -235,10 +239,6 @@
 
         function openSpecialOffers() {
             alert("No special offers right now. Stay tuned!");
-        }
-
-        function openBonusesAlert() {
-            alert("Bonuses are active! Claim your daily bonus and invite friends.");
         }
 
         function logoutUser() {
