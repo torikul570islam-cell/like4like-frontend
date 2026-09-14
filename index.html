@@ -7,12 +7,23 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         body { font-family: Arial, sans-serif; background: #0f172a; color: #fff; padding: 10px; margin: 0; text-align: center; }
+        .header-container { display: flex; justify-content: space-between; align-items: center; position: relative; padding: 5px 10px; margin-bottom: 10px; }
+        .header-container h2 { margin: 0; font-size: 20px; }
+        
+        /* থ্রি-ডট মেনু বাটন */
+        .menu-icon-btn { background: none; border: none; color: #fff; font-size: 22px; cursor: pointer; padding: 5px; }
+        
+        /* ড্রপডাউন মেনু পপআপ */
+        .dropdown-menu { display: none; position: absolute; right: 10px; top: 45px; background: #1e293b; border: 1px solid #475569; border-radius: 8px; width: 210px; box-shadow: 0 4px 12px rgba(0,0,0,0.5); z-index: 1000; text-align: left; }
+        .dropdown-menu button { background: none; border: none; color: #fff; padding: 11px 15px; width: 100%; text-align: left; cursor: pointer; font-size: 14px; border-bottom: 1px solid #334155; }
+        .dropdown-menu button:hover { background: #334155; color: #38bdf8; }
+        .dropdown-menu button:last-child { border-bottom: none; color: #ef4444; }
+
         .card { background: #1e293b; padding: 12px; border-radius: 10px; margin-bottom: 12px; text-align: left; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
         .task-item { background: #334155; padding: 10px; margin: 8px 0; border-radius: 8px; }
         .btn-group { display: flex; gap: 5px; margin-top: 8px; }
         a.btn, button.btn { background: #3b82f6; color: white; padding: 6px 10px; border: none; border-radius: 5px; text-decoration: none; font-size: 13px; cursor: pointer; text-align: center; flex: 1; }
         button.skip-btn { background: #ef4444; }
-        button.skip-btn:hover { background: #dc2626; }
         input, select { width: 100%; padding: 7px; margin: 4px 0 8px 0; border-radius: 5px; border: 1px solid #475569; background: #0f172a; color: #fff; box-sizing: border-box; }
         .tab-menu { display: flex; justify-content: space-around; background: #1e293b; padding: 8px; border-radius: 8px; margin-bottom: 12px; }
         .tab-btn { background: none; border: none; color: #94a3b8; font-weight: bold; cursor: pointer; font-size: 14px; }
@@ -20,17 +31,33 @@
     </style>
 </head>
 <body>
-    <h2>🔥 Like4Like App</h2>
 
-    <!-- টাব মেনু -->
+    <!-- হেডার এবং থ্রি-ডট মেনু -->
+    <div class="header-container">
+        <h2>🔥 Like4Like App</h2>
+        <button class="menu-icon-btn" onclick="toggleMenu()">⋮</button>
+        
+        <!-- ড্রপডাউন মেনু (Like4Like স্টাইল অনুযায়ী API এবং Blog বাদ দেওয়া হয়েছে) -->
+        <div id="dropdownMenu" class="dropdown-menu">
+            <button onclick="switchTab('add'); toggleMenu();">⚙️ Add/Manage Pages</button>
+            <button onclick="alert('Free Credits section coming soon!'); toggleMenu();">🪙 Free Credits</button>
+            <button onclick="switchTab('profile'); toggleMenu();">🛒 Buy Credits</button>
+            <button onclick="alert('No special offers right now.'); toggleMenu();">🏷️ Special Offers</button>
+            <button onclick="alert('Bonuses are active!'); toggleMenu();">⭐ Bonuses</button>
+            <button onclick="switchTab('profile'); toggleMenu();">👤 Profile</button>
+            <button id="admin-dropdown-btn" style="display:none;" onclick="switchTab('admin'); toggleMenu();">🛡️ Admin Panel</button>
+            <button onclick="alert('Logged out session.'); toggleMenu();">🚪 Logout</button>
+        </div>
+    </div>
+
+    <!-- মূল ট্যাব মেনু -->
     <div class="tab-menu">
         <button class="tab-btn active" onclick="switchTab('earn')">Earn</button>
         <button class="tab-btn" onclick="switchTab('add')">Add Task</button>
         <button class="tab-btn" onclick="switchTab('profile')">Profile</button>
-        <button class="tab-btn" id="admin-menu-btn" style="display:none;" onclick="switchTab('admin')">Admin</button>
     </div>
 
-    <!-- ১. আর্ন টাব (২ টা করে টাস্ক, স্কিপ এবং কমপ্লিট অপশন) -->
+    <!-- ১. আর্ন ট্যাব -->
     <div id="tab-earn" class="tab-content">
         <div class="card" style="text-align: center;">
             <h3>My Balance</h3>
@@ -42,7 +69,7 @@
         </div>
     </div>
 
-    <!-- ২. এড টাস্ক টাব -->
+    <!-- ২. এড টাস্ক ট্যাব -->
     <div id="tab-add" class="tab-content" style="display:none;">
         <div class="card">
             <h3>➕ Add New Campaign</h3>
@@ -64,7 +91,7 @@
         </div>
     </div>
 
-    <!-- ৩. প্রোফাইল টাব (ইউনিক আইডি ও স্টার দিয়ে ক্রেডিট কেনা) -->
+    <!-- ৩. প্রোফাইল ট্যাব -->
     <div id="tab-profile" class="tab-content" style="display:none;">
         <div class="card">
             <h3>👤 My Profile</h3>
@@ -78,7 +105,7 @@
         </div>
     </div>
 
-    <!-- ৪. এডমিন প্যানেল টাব (কাউকে ফ্রি ক্রেডিট দেওয়ার জন্য) -->
+    <!-- ৪. এডমিন প্যানেল ট্যাব -->
     <div id="tab-admin" class="tab-content" style="display:none;">
         <div class="card" style="border: 1px solid #eab308;">
             <h3 style="color: #eab308;">🛡️ Admin Panel</h3>
@@ -96,11 +123,24 @@
 
         const telegramId = tg.initDataUnsafe?.user?.id ? tg.initDataUnsafe.user.id.toString() : "test_admin_123";
 
+        function toggleMenu() {
+            const menu = document.getElementById('dropdownMenu');
+            menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+        }
+
+        window.onclick = function(event) {
+            if (!event.target.matches('.menu-icon-btn')) {
+                const menu = document.getElementById('dropdownMenu');
+                if (menu && menu.style.display === 'block') {
+                    menu.style.display = 'none';
+                }
+            }
+        }
+
         function switchTab(tabName) {
             document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
             document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
             document.getElementById(`tab-${tabName}`).style.display = 'block';
-            event.currentTarget.classList.add('active');
         }
 
         async function fetchUserData() {
@@ -111,9 +151,9 @@
                 document.getElementById('profile-points').innerText = data.points || 0;
                 document.getElementById('profile-id').innerText = data.telegramId;
 
-                // যদি ইউজার এডমিন হয়, তবে এডমিন ট্যাব শো করবে
+                // যদি ইউজার এডমিন হয়, তবে ড্রপডাউন মেনুতে এডমিন প্যানেল শো করবে
                 if(data.isAdmin) {
-                    document.getElementById('admin-menu-btn').style.display = 'inline-block';
+                    document.getElementById('admin-dropdown-btn').style.display = 'block';
                 }
             } catch (err) {
                 console.error(err);
@@ -131,7 +171,6 @@
                     return;
                 }
 
-                // প্রতিবার সর্বোচ্চ ২টি টাস্ক রেন্ডার করবে এবং কমপ্লিট বা স্কিপ করলে সাথে সাথে অটো চলে যাবে
                 listDiv.innerHTML = tasks.map(t => `
                     <div class="task-item">
                         <div style="text-align: left; font-size: 13px;">
@@ -155,7 +194,7 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ telegramId, taskId })
             });
-            fetchTasks(); // অটো রিমুভ হয়ে নতুন টাস্ক লোড হবে
+            fetchTasks();
         }
 
         async function completeTask(taskId) {
