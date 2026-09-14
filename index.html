@@ -109,7 +109,7 @@
         </div>
     </div>
 
-    <!-- ৩. ফ্রি ক্রেডিট ট্যাব (এখানেই ডেইলি লগইন বোনাস রাখা হয়েছে) -->
+    <!-- ৩. ফ্রি ক্রেডিট ট্যাব -->
     <div id="tab-free-credits" class="tab-content" style="display:none;">
         <div class="card" style="text-align: center;">
             <h3 style="color: #38bdf8;">🪙 Daily Login Bonus</h3>
@@ -121,13 +121,13 @@
         </div>
     </div>
 
-    <!-- ৪. বোনাসেস ট্যাব (এখানে শুধু রেফারেল প্রোগ্রাম থাকবে) -->
+    <!-- ৪. বোনাসেস ট্যাব (রেফারেল প্রোগ্রাম ও ৫০ ক্রেডিট বোনাস ইনফো) -->
     <div id="tab-bonuses" class="tab-content" style="display:none;">
         <div class="card" style="text-align: center;">
             <h3 style="color: #38bdf8;">👥 Referral Program & Bonuses</h3>
-            <p style="color: #94a3b8; font-size: 14px;">Invite friends and earn points & commission!</p>
+            <p style="color: #94a3b8; font-size: 14px;">Invite friends and get <b>50 Credit Bonus</b> per referral!</p>
             <div style="background: #334155; padding: 12px; border-radius: 8px; margin: 10px 0; text-align: left;">
-                <label style="font-size: 12px; color: #cbd5e1;">Your Referral Link:</label>
+                <label style="font-size: 12px; color: #cbd5e1;">Your Unique Referral Link:</label>
                 <input type="text" id="referral-link" readonly style="background: #1e293b; color: #38bdf8; font-size: 12px;" value="Loading...">
                 <button class="btn" onclick="copyReferralLink()" style="background: #3b82f6; width: 100%; margin-top: 5px; font-weight: bold;">📋 Copy Referral Link</button>
             </div>
@@ -236,10 +236,16 @@
             document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
             const target = document.getElementById(`tab-${tabName}`);
             if(target) target.style.display = 'block';
+            
+            // টেমপ্লেট ট্যাব বাটনের একটিভ স্ট্যাটাস ঠিক করার জন্য
+            document.querySelectorAll('.tab-btn').forEach(el => {
+                if(el.getAttribute('onclick')?.includes(`'${tabName}'`)) {
+                    el.classList.add('active');
+                }
+            });
         }
 
         function openSpecialOffers() {
-            // স্পেশাল অফারসে ক্লিক করলে এটি ফ্রি ক্রেডিট বা অন্য কোনো নির্দিষ্ট ট্যাবে নিয়ে যেতে পারে, কোনো অ্যালার্ট দেখাবে না
             switchTab('free-credits');
         }
 
@@ -498,7 +504,8 @@
             }
 
             if (amount < 500) {
-                alert("Minimum withdrawal amount is 500 Stars!");
+                awsAlert = "Minimum withdrawal amount is 500 Stars!";
+                alert(awsAlert);
                 return;
             }
 
@@ -532,7 +539,7 @@
             const res = await fetch(`${SERVER_URL}/api/admin/give-credit`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ adminId: telegramId, targetTelegramId: targetUserId, amount })
+                body: JSON.jsx ? {} : JSON.stringify({ adminId: telegramId, targetTelegramId: targetUserId, amount })
             });
             const data = await res.json();
             if(data.success) {
