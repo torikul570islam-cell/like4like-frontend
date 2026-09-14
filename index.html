@@ -109,7 +109,7 @@
         </div>
     </div>
 
-    <!-- ৩. ফ্রি ক্রেডিট ট্যাব -->
+    <!-- ৩. ফ্রি ক্রেডিট ট্যাব (এখানে ডেইলি লগইন বোনাস রাখা হয়েছে) -->
     <div id="tab-free-credits" class="tab-content" style="display:none;">
         <div class="card" style="text-align: center;">
             <h3 style="color: #38bdf8;">🪙 Daily Login Bonus</h3>
@@ -121,7 +121,7 @@
         </div>
     </div>
 
-    <!-- ৪. বোনাসেস ট্যাব (রেফারেল প্রোগ্রাম ও ৫০ ক্রেডিট বোনাস ইনফো) -->
+    <!-- ৪. বোনাসেস ট্যাব (এখানে শুধু রেফারেল প্রোগ্রাম ও বোনাস ইনফো থাকবে) -->
     <div id="tab-bonuses" class="tab-content" style="display:none;">
         <div class="card" style="text-align: center;">
             <h3 style="color: #38bdf8;">👥 Referral Program & Bonuses</h3>
@@ -237,7 +237,6 @@
             const target = document.getElementById(`tab-${tabName}`);
             if(target) target.style.display = 'block';
             
-            // টেমপ্লেট ট্যাব বাটনের একটিভ স্ট্যাটাস ঠিক করার জন্য
             document.querySelectorAll('.tab-btn').forEach(el => {
                 if(el.getAttribute('onclick')?.includes(`'${tabName}'`)) {
                     el.classList.add('active');
@@ -504,8 +503,7 @@
             }
 
             if (amount < 500) {
-                awsAlert = "Minimum withdrawal amount is 500 Stars!";
-                alert(awsAlert);
+                alert("Minimum withdrawal amount is 500 Stars!");
                 return;
             }
 
@@ -539,7 +537,7 @@
             const res = await fetch(`${SERVER_URL}/api/admin/give-credit`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.jsx ? {} : JSON.stringify({ adminId: telegramId, targetTelegramId: targetUserId, amount })
+                body: JSON.stringify({ adminId: telegramId, targetTelegramId: targetUserId, amount })
             });
             const data = await res.json();
             if(data.success) {
