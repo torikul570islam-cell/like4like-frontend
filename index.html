@@ -24,7 +24,7 @@
         button.skip-btn { background: #ef4444; }
         input, select { width: 100%; padding: 7px; margin: 4px 0 8px 0; border-radius: 5px; border: 1px solid #475569; background: #0f172a; color: #fff; box-sizing: border-box; }
         .tab-menu { display: flex; justify-content: space-around; background: #1e293b; padding: 8px; border-radius: 8px; margin-bottom: 12px; }
-        .tab-btn { background: none; border: none; color: #94a3b8; font-weight: bold; cursor: pointer; font-size: 13px; }
+        .tab-btn { background: none; border: none; color: #94a3b8; font-weight: bold; cursor: pointer; font-size: 12px; }
         .tab-btn.active { color: #38bdf8; border-bottom: 2px solid #38bdf8; }
     </style>
 </head>
@@ -34,6 +34,7 @@
         <h2>🔥 Like4Like App</h2>
         <button class="menu-icon-btn" onclick="toggleMenu()">⋮</button>
         
+        <!-- ড্রপডাউন মেনু: এখানে সরাসরি ট্যাব সুইচ ফাংশন দেওয়া হয়েছে -->
         <div id="dropdownMenu" class="dropdown-menu">
             <button onclick="switchTab('add'); toggleMenu();">⚙️ Add/Manage Pages</button>
             <button onclick="switchTab('free-credits'); toggleMenu();">🪙 Free Credits</button>
