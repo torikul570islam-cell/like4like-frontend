@@ -53,9 +53,8 @@
 
                 if (data.success) {
                     alert("Login Successful!");
-                    // লগইন সফল হলে ইউজারের ডাটা লোকালস্টোরেজে রেখে ড্যাশবোর্ডে রিডাইরেক্ট করতে পারেন
                     localStorage.setItem('telegramId', data.user.telegramId);
-                    window.location.href = "dashboard.html"; // আপনার ড্যাশবোর্ড পেজ থাকলে সেখানে পাঠাবেন
+                    window.location.href = "index.html"; // সফল হলে সরাসরি মূল পেজে যাবে
                 } else {
                     errorMsg.innerText = data.error || "Invalid credentials!";
                 }
