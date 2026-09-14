@@ -36,7 +36,7 @@
         
         <div id="dropdownMenu" class="dropdown-menu">
             <button onclick="switchTab('add'); toggleMenu();">⚙️ Add/Manage Pages</button>
-            <button onclick="alert('Free Credits section coming soon!'); toggleMenu();">🪙 Free Credits</button>
+            <button onclick="switchTab('free-credits'); toggleMenu();">🪙 Free Credits</button>
             <button onclick="switchTab('profile'); toggleMenu();">🛒 Buy Credits</button>
             <button onclick="alert('No special offers right now.'); toggleMenu();">🏷️ Special Offers</button>
             <button onclick="alert('Bonuses are active!'); toggleMenu();">⭐ Bonuses</button>
@@ -64,12 +64,11 @@
         </div>
     </div>
 
-    <!-- ২. এড টাস্ক ট্যাব (Like4Like Style + Custom More Option) -->
+    <!-- ২. এড টাস্ক ট্যাব (Like4Like Style + Custom More Option & Min 5 Reward) -->
     <div id="tab-add" class="tab-content" style="display:none;">
         <div class="card">
             <h3 style="text-align: center; margin-bottom: 15px; color: #38bdf8;">📊 Add New Promotion</h3>
             
-            <!-- সোশ্যাল মিডিয়া ও কাস্টম অপশন বাটন লিস্ট -->
             <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 15px;">
                 <button class="btn" style="background: #334155; text-align: left; padding: 10px;" onclick="selectPlatform('telegram', 'Channel Join')">📢 Telegram Channel Join</button>
                 <button class="btn" style="background: #334155; text-align: left; padding: 10px;" onclick="selectPlatform('youtube', 'YouTube Subscribe')">🔴 YouTube Subscribe</button>
@@ -85,11 +84,9 @@
 
             <hr style="border-color: #334155; margin: 15px 0;">
 
-            <!-- সিলেক্টেড প্রমোশন ফর্ম -->
             <div id="campaign-form" style="background: #0f172a; padding: 12px; border-radius: 8px; border: 1px solid #475569;">
                 <p style="margin-top:0;"><b>Selected Type:</b> <span id="selected-type" style="color: #4ade80;">TELEGRAM - Channel Join</span></p>
                 
-                <!-- কাস্টম অপশনের জন্য ইনপুট বক্স (ডিফল্টভাবে হাইড থাকবে) -->
                 <div id="custom-option-container" style="display:none; margin-bottom: 8px;">
                     <label style="color: #eab308;">Custom Option / Platform Name:</label>
                     <input type="text" id="customTaskName" placeholder="e.g. Twitter Follow, Website Visit">
@@ -101,15 +98,27 @@
                 <label>Target Link / URL:</label>
                 <input type="text" id="taskLink" placeholder="https://...">
 
-                <label>Reward per action (Points):</label>
-                <input type="number" id="taskReward" value="10" min="5">
+                <label>Reward per action (Points): (Min 5)</label>
+                <input type="number" id="taskReward" value="5" min="5">
 
                 <button class="btn" onclick="createTask()" style="width: 100%; margin-top: 10px; background: #2563eb; font-weight: bold;">Submit Task</button>
             </div>
         </div>
     </div>
 
-    <!-- ৩. প্রোফাইল ট্যাব -->
+    <!-- ৩. ফ্রি ক্রেডিট ট্যাব (প্রতিদিন ৫ পয়েন্ট ডেইলি বোনাস ক্লেইম) -->
+    <div id="tab-free-credits" class="tab-content" style="display:none;">
+        <div class="card" style="text-align: center;">
+            <h3 style="color: #38bdf8;">🪙 Daily Login Bonus</h3>
+            <p style="color: #94a3b8; font-size: 14px;">Claim your daily login bonus of 5 free points every 24 hours!</p>
+            <div style="background: #334155; padding: 15px; border-radius: 8px; margin: 15px 0;">
+                <h2 style="color: #4ade80; margin: 0 0 10px 0;">+5 Points</h2>
+                <button class="btn" onclick="claimDailyBonus()" style="background: #10b981; font-weight: bold; width: 100%; padding: 10px;">Claim 5 Points Bonus</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ৪. প্রোফাইল ট্যাব -->
     <div id="tab-profile" class="tab-content" style="display:none;">
         <div class="card">
             <h3>👤 My Profile</h3>
@@ -136,7 +145,7 @@
         </div>
     </div>
 
-    <!-- ৪. এডমিন প্যানেল ট্যাব -->
+    <!-- ৫. এডমিন প্যানেল ট্যাব -->
     <div id="tab-admin" class="tab-content" style="display:none;">
         <div class="card" style="border: 1px solid #eab308;">
             <h3 style="color: #eab308;">🛡️ Admin Panel</h3>
@@ -174,7 +183,8 @@
         function switchTab(tabName) {
             document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
             document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-            document.getElementById(`tab-${tabName}`).style.display = 'block';
+            const target = document.getElementById(`tab-${tabName}`);
+            if(target) target.style.display = 'block';
         }
 
         function logoutUser() {
@@ -183,7 +193,6 @@
             window.location.href = "login.html";
         }
 
-        // সাধারণ প্ল্যাটফর্ম সিলেকশন হ্যান্ডলার
         function selectPlatform(plat, type) {
             document.getElementById('custom-option-container').style.display = 'none';
             document.getElementById('platform').value = plat;
@@ -191,7 +200,6 @@
             document.getElementById('selected-type').innerText = `${plat.toUpperCase()} - ${type}`;
         }
 
-        // মোর অপশন হ্যান্ডলার (কাস্টম নাম লেখার বক্স দেখাবে)
         function selectMoreOption() {
             document.getElementById('custom-option-container').style.display = 'block';
             document.getElementById('platform').value = 'custom';
@@ -321,13 +329,37 @@
             }, 1000);
         }
 
+        // প্রতিদিন ৫ পয়েন্ট ডেইলি বোনাস ক্লেইম করার ফাংশন
+        async function claimDailyBonus() {
+            try {
+                const res = await fetch(`${SERVER_URL}/api/daily-bonus`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ telegramId })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    alert("Successfully claimed 5 points daily bonus!");
+                    fetchUserData();
+                } else {
+                    alert(data.error || "You have already claimed your daily bonus today!");
+                }
+            } catch (err) {
+                alert("Server connection error!");
+            }
+        }
+
         async function createTask() {
             let platform = document.getElementById('platform').value;
             let taskType = document.getElementById('taskType').value;
             const link = document.getElementById('taskLink').value;
-            const reward = document.getElementById('taskReward').value;
+            const reward = Number(document.getElementById('taskReward').value);
 
-            // যদি মোর অপশন সিলেক্ট করা থাকে, তবে কাস্টম ইনপুট থেকে নাম নিয়ে নেব
+            if (reward < 5) {
+                alert("Minimum reward per action must be at least 5 points!");
+                return;
+            }
+
             if (platform === 'custom') {
                 const customName = document.getElementById('customTaskName').value.trim();
                 if (!customName) {
