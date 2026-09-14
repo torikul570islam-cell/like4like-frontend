@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Website Login - Like4Like</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #0f172a; color: #fff; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .login-card { background: #1e293b; padding: 25px; border-radius: 12px; width: 320px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+        h2 { text-align: center; color: #38bdf8; margin-bottom: 20px; }
+        label { display: block; margin-bottom: 5px; font-size: 14px; color: #94a3b8; }
+        input { width: 100%; padding: 10px; margin-bottom: 15px; border-radius: 6px; border: 1px solid #475569; background: #0f172a; color: #fff; box-sizing: border-box; }
+        .btn { background: #3b82f6; color: white; padding: 10px; border: none; border-radius: 6px; width: 100%; font-size: 15px; cursor: pointer; font-weight: bold; }
+        .btn:hover { background: #2563eb; }
+        #error-msg { color: #ef4444; font-size: 13px; text-align: center; margin-top: 10px; }
+    </style>
+</head>
+<body>
+
+    <div class="login-card">
+        <h2>🔐 Website Login</h2>
+        <label>Telegram ID:</label>
+        <input type="text" id="loginTelegramId" placeholder="Enter your telegram id">
+        
+        <label>Password:</label>
+        <input type="password" id="loginPassword" placeholder="Enter your password">
+        
+        <button class="btn" onclick="webLogin()">Login</button>
+        <p id="error-msg"></p>
+    </div>
+
+    <script>
+        async function webLogin() {
+            const telegramId = document.getElementById('loginTelegramId').value;
+            const password = document.getElementById('loginPassword').value;
+            const errorMsg = document.getElementById('error-msg');
+
+            errorMsg.innerText = "";
+
+            if (!telegramId || !password) {
+                errorMsg.innerText = "Please fill in all fields!";
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/website-login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ telegramId, password })
+                });
+
+                const data = await res.json();
+
+                if (data.success) {
+                    alert("Login Successful!");
+                    // লগইন সফল হলে ইউজারের ডাটা লোকালস্টোরেজে রেখে ড্যাশবোর্ডে রিডাইরেক্ট করতে পারেন
+                    localStorage.setItem('telegramId', data.user.telegramId);
+                    window.location.href = "dashboard.html"; // আপনার ড্যাশবোর্ড পেজ থাকলে সেখানে পাঠাবেন
+                } else {
+                    errorMsg.innerText = data.error || "Invalid credentials!";
+                }
+            } catch (err) {
+                errorMsg.innerText = "Server connection error!";
+            }
+        }
+    </script>
+</body>
+</html>
