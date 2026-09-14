@@ -36,10 +36,10 @@
         
         <div id="dropdownMenu" class="dropdown-menu">
             <button onclick="switchTab('add'); toggleMenu();">⚙️ Add/Manage Pages</button>
-            <button onclick="switchTab('free-credits'); toggleMenu();">🪙 Free Credits & Referral</button>
+            <button onclick="switchTab('free-credits'); toggleMenu();">🪙 Free Credits</button>
             <button onclick="switchTab('profile'); toggleMenu();">🛒 Buy Credits</button>
-            <button onclick="alert('No special offers right now.'); toggleMenu();">🏷️ Special Offers</button>
-            <button onclick="switchTab('free-credits'); toggleMenu();">⭐ Bonuses</button>
+            <button onclick="openSpecialOffers(); toggleMenu();">🏷️ Special Offers</button>
+            <button onclick="openBonusesAlert(); toggleMenu();">⭐ Bonuses</button>
             <button onclick="switchTab('profile'); toggleMenu();">👤 Profile</button>
             <button id="admin-dropdown-btn" style="display:none;" onclick="switchTab('admin'); toggleMenu();">🛡️ Admin Panel</button>
             <button onclick="logoutUser(); toggleMenu();">🚪 Logout</button>
@@ -231,6 +231,14 @@
             document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
             const target = document.getElementById(`tab-${tabName}`);
             if(target) target.style.display = 'block';
+        }
+
+        function openSpecialOffers() {
+            alert("No special offers right now. Stay tuned!");
+        }
+
+        function openBonusesAlert() {
+            alert("Bonuses are active! Claim your daily bonus and invite friends.");
         }
 
         function logoutUser() {
