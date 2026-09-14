@@ -36,7 +36,7 @@
         
         <div id="dropdownMenu" class="dropdown-menu">
             <button onclick="switchTab('add'); toggleMenu();">⚙️ Add/Manage Pages</button>
-            <button onclick="switchTab('free-credits'); toggleMenu();">🪙 Free Credits</button>
+            <button onclick="switchTab('free-credits'); toggleMenu();">🪙 Free Credits & Referral</button>
             <button onclick="switchTab('profile'); toggleMenu();">🛒 Buy Credits</button>
             <button onclick="alert('No special offers right now.'); toggleMenu();">🏷️ Special Offers</button>
             <button onclick="alert('Bonuses are active!'); toggleMenu();">⭐ Bonuses</button>
@@ -49,6 +49,7 @@
     <div class="tab-menu">
         <button class="tab-btn active" onclick="switchTab('earn')">Earn</button>
         <button class="tab-btn" onclick="switchTab('add')">Add Task</button>
+        <button class="tab-btn" onclick="switchTab('free-credits')">Referral</button>
         <button class="tab-btn" onclick="switchTab('profile')">Profile</button>
     </div>
 
@@ -64,7 +65,7 @@
         </div>
     </div>
 
-    <!-- ২. এড টাস্ক ট্যাব (Like4Like Style + Custom More Option & Min 5 Reward) -->
+    <!-- ২. এড টাস্ক ট্যাব -->
     <div id="tab-add" class="tab-content" style="display:none;">
         <div class="card">
             <h3 style="text-align: center; margin-bottom: 15px; color: #38bdf8;">📊 Add New Promotion</h3>
@@ -106,7 +107,7 @@
         </div>
     </div>
 
-    <!-- ৩. ফ্রি ক্রেডিট ট্যাব (প্রতিদিন ৫ পয়েন্ট ডেইলি বোনাস ক্লেইম) -->
+    <!-- ৩. ফ্রি ক্রেডিট ও রেফারেল ট্যাব -->
     <div id="tab-free-credits" class="tab-content" style="display:none;">
         <div class="card" style="text-align: center;">
             <h3 style="color: #38bdf8;">🪙 Daily Login Bonus</h3>
@@ -116,6 +117,17 @@
                 <button class="btn" onclick="claimDailyBonus()" style="background: #10b981; font-weight: bold; width: 100%; padding: 10px;">Claim 5 Points Bonus</button>
             </div>
         </div>
+
+        <div class="card" style="text-align: center;">
+            <h3 style="color: #38bdf8;">👥 Referral Program</h3>
+            <p style="color: #94a3b8; font-size: 14px;">Invite friends and earn points & commission!</p>
+            <div style="background: #334155; padding: 12px; border-radius: 8px; margin: 10px 0; text-align: left;">
+                <label style="font-size: 12px; color: #cbd5e1;">Your Referral Link:</label>
+                <input type="text" id="referral-link" readonly style="background: #1e293b; color: #38bdf8; font-size: 12px;" value="Loading...">
+                <button class="btn" onclick="copyReferralLink()" style="background: #3b82f6; width: 100%; margin-top: 5px; font-weight: bold;">📋 Copy Referral Link</button>
+            </div>
+            <p style="font-size: 13px; color: #cbd5e1;">Total Referrals: <span id="ref-count" style="color: #4ade80; font-weight: bold;">0</span></p>
+        </div>
     </div>
 
     <!-- ৪. প্রোফাইল ট্যাব -->
@@ -124,6 +136,7 @@
             <h3>👤 My Profile</h3>
             <p><b>Telegram ID:</b> <span id="profile-id" style="color: #38bdf8;"></span></p>
             <p><b>Total Balance:</b> <span id="profile-points" style="color: #4ade80;"></span> Points</p>
+            <p><b>Star Balance:</b> <span id="profile-stars" style="color: #eab308;">0</span> Stars</p>
             
             <hr style="border-color: #334155; margin: 15px 0;">
 
@@ -141,7 +154,21 @@
             <h4 style="margin-top: 20px;">⭐ Buy Credits with Telegram Stars</h4>
             <button class="btn" onclick="buyStars('small')" style="margin-bottom: 5px; width:100%;">Buy 100 Pts (5 Stars)</button>
             <button class="btn" onclick="buyStars('medium')" style="margin-bottom: 5px; width:100%;">Buy 500 Pts (20 Stars)</button>
-            <button class="btn" onclick="buyStars('large')" style="width:100%;">Buy 1200 Pts (40 Stars)</button>
+            <button class="btn" onclick="buyStars('large')" style="margin-bottom: 15px; width:100%;">Buy 1200 Pts (40 Stars)</button>
+
+            <hr style="border-color: #334155; margin: 15px 0;">
+            <h4 style="color: #eab308; margin-bottom: 8px;">💸 Withdraw Stars</h4>
+            <label>Payment Method:</label>
+            <select id="withdrawMethod">
+                <option value="bkash">bKash</option>
+                <option value="nagad">Nagad</option>
+                <option value="rocket">Rocket</option>
+            </select>
+            <label>Account Number / Details:</label>
+            <input type="text" id="withdrawAccount" placeholder="Enter your number">
+            <label>Amount (Stars - Min 500):</label>
+            <input type="number" id="withdrawAmount" placeholder="Min 500">
+            <button class="btn" onclick="requestWithdraw()" style="background: #eab308; color: #000; width: 100%; font-weight: bold; margin-top: 5px;">Submit Withdraw Request</button>
         </div>
     </div>
 
@@ -163,8 +190,28 @@
         const tg = window.Telegram.WebApp;
         tg.expand();
 
+        const urlParams = new URLSearchParams(window.location.search);
+        let startParam = urlParams.get('start') || urlParams.get('tgWebAppStartParam');
+        if (startParam) {
+            localStorage.setItem('referredBy', startParam);
+        }
+
         const telegramId = tg.initDataUnsafe?.user?.id ? tg.initDataUnsafe.user.id.toString() : (localStorage.getItem('telegramId') || "test_admin_123");
         let hasPasswordSet = false;
+
+        // ইউজার লগইন করার সময় বা পেজ লোড হলে রেফারেল বাই ডেটা সার্ভারে পাঠানোর ব্যবস্থা
+        async function registerUserWithReferral() {
+            const referredBy = localStorage.getItem('referredBy') || null;
+            try {
+                await fetch(`${SERVER_URL}/api/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ telegramId, referredBy })
+                });
+            } catch (err) {
+                console.error("Registration error:", err);
+            }
+        }
 
         function toggleMenu() {
             const menu = document.getElementById('dropdownMenu');
@@ -189,6 +236,7 @@
 
         function logoutUser() {
             localStorage.removeItem('telegramId');
+            localStorage.removeItem('referredBy');
             alert("Logged out successfully!");
             window.location.href = "login.html";
         }
@@ -213,7 +261,13 @@
                 const data = await res.json();
                 document.getElementById('balance').innerText = `${data.points || 0} Points`;
                 document.getElementById('profile-points').innerText = data.points || 0;
+                document.getElementById('profile-stars').innerText = data.stars || 0;
                 document.getElementById('profile-id').innerText = data.telegramId;
+                document.getElementById('ref-count').innerText = data.referralCount || 0;
+
+                // বটের ইউজারনেম দিয়ে ডায়নামিক রেফারেল লিঙ্ক তৈরি
+                const botUsername = "YourBotUsername"; // আপনার টেলিগ্রাম বটের ইউজারনেম এখানে দিন (@ ছাড়া)
+                document.getElementById('referral-link').value = `https://t.me/${botUsername}?start=${telegramId}`;
 
                 if (data.password && data.password !== "") {
                     hasPasswordSet = true;
@@ -233,6 +287,14 @@
             } catch (err) {
                 console.error(err);
             }
+        }
+
+        function copyReferralLink() {
+            const refLink = document.getElementById('referral-link');
+            refLink.select();
+            refLink.setSelectionRange(0, 99999);
+            navigator.clipboard.writeText(refLink.value);
+            alert("Referral link copied to clipboard!");
         }
 
         async function handlePasswordAction() {
@@ -329,7 +391,6 @@
             }, 1000);
         }
 
-        // প্রতিদিন ৫ পয়েন্ট ডেইলি বোনাস ক্লেইম করার ফাংশন
         async function claimDailyBonus() {
             try {
                 const res = await fetch(`${SERVER_URL}/api/daily-bonus`, {
@@ -402,7 +463,7 @@
                 if (data.success && data.invoiceLink) {
                     tg.openInvoice(data.invoiceLink, async (status) => {
                         if (status === 'paid') {
-                            alert("Payment successful! Points will be added shortly.");
+                            alert("Payment successful! Points and referral commission added.");
                             setTimeout(() => fetchUserData(), 2000);
                         } else if (status === 'cancelled') {
                             alert("Payment cancelled.");
@@ -412,6 +473,42 @@
                     });
                 } else {
                     alert(data.error || "Failed to create invoice");
+                }
+            } catch (err) {
+                console.error(err);
+                alert("Server connection error!");
+            }
+        }
+
+        async function requestWithdraw() {
+            const method = document.getElementById('withdrawMethod').value;
+            const account = document.getElementById('withdrawAccount').value;
+            const amount = Number(document.getElementById('withdrawAmount').value);
+
+            if (!account || !amount) {
+                alert("Please fill in all withdrawal fields!");
+                return;
+            }
+
+            if (amount < 500) {
+                alert("Minimum withdrawal amount is 500 Stars!");
+                return;
+            }
+
+            try {
+                const res = await fetch(`${SERVER_URL}/api/withdraw`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ telegramId, method, account, amount })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    alert("Withdrawal request submitted successfully!");
+                    document.getElementById('withdrawAccount').value = '';
+                    document.getElementById('withdrawAmount').value = '';
+                    fetchUserData();
+                } else {
+                    alert(data.error || "Withdrawal failed");
                 }
             } catch (err) {
                 console.error(err);
@@ -439,8 +536,14 @@
             }
         }
 
-        fetchUserData();
-        fetchTasks();
+        // ইনিশিয়ালাইজেশন
+        async function initApp() {
+            await registerUserWithReferral();
+            await fetchUserData();
+            await fetchTasks();
+        }
+
+        initApp();
     </script>
 </body>
 </html>
