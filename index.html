@@ -39,7 +39,7 @@
             <button onclick="switchTab('add'); toggleMenu();">⚙️ Add/Manage Pages</button>
             <button onclick="switchTab('free-credits'); toggleMenu();">🪙 Free Credits</button>
             <button onclick="switchTab('profile'); toggleMenu();">🛒 Buy Credits</button>
-            <button onclick="openSpecialOffers(); toggleMenu();">🏷️ Special Offers</button>
+            <button onclick="switchTab('free-credits'); toggleMenu();">🏷️ Special Offers</button>
             <button onclick="switchTab('bonuses'); toggleMenu();">⭐ Bonuses</button>
             <button onclick="switchTab('profile'); toggleMenu();">👤 Profile</button>
             <button id="admin-dropdown-btn" style="display:none;" onclick="switchTab('admin'); toggleMenu();">🛡️ Admin Panel</button>
@@ -47,6 +47,7 @@
         </div>
     </div>
 
+    <!-- মূল ট্যাব মেনুবার -->
     <div class="tab-menu">
         <button class="tab-btn active" onclick="switchTab('earn')">Earn</button>
         <button class="tab-btn" onclick="switchTab('add')">Add Task</button>
@@ -109,7 +110,7 @@
         </div>
     </div>
 
-    <!-- ৩. ফ্রি ক্রেডিট ট্যাব (এখানে ডেইলি লগইন বোনাস রাখা হয়েছে) -->
+    <!-- ৩. ফ্রি ক্রেডিট ট্যাব (ডেইলি লগইন বোনাস) -->
     <div id="tab-free-credits" class="tab-content" style="display:none;">
         <div class="card" style="text-align: center;">
             <h3 style="color: #38bdf8;">🪙 Daily Login Bonus</h3>
@@ -121,7 +122,7 @@
         </div>
     </div>
 
-    <!-- ৪. বোনাসেস ট্যাব (এখানে শুধু রেফারেল প্রোগ্রাম ও বোনাস ইনফো থাকবে) -->
+    <!-- ৪. বোনাসেস ট্যাব (রেফারেল প্রোগ্রাম ও বোনাস ইনফো) -->
     <div id="tab-bonuses" class="tab-content" style="display:none;">
         <div class="card" style="text-align: center;">
             <h3 style="color: #38bdf8;">👥 Referral Program & Bonuses</h3>
@@ -234,6 +235,7 @@
         function switchTab(tabName) {
             document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
             document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            
             const target = document.getElementById(`tab-${tabName}`);
             if(target) target.style.display = 'block';
             
@@ -242,10 +244,6 @@
                     el.classList.add('active');
                 }
             });
-        }
-
-        function openSpecialOffers() {
-            switchTab('free-credits');
         }
 
         function logoutUser() {
