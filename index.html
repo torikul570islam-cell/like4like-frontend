@@ -10,10 +10,8 @@
         .header-container { display: flex; justify-content: space-between; align-items: center; position: relative; padding: 5px 10px; margin-bottom: 10px; }
         .header-container h2 { margin: 0; font-size: 20px; }
         
-        /* থ্রি-ডট মেনু বাটন */
         .menu-icon-btn { background: none; border: none; color: #fff; font-size: 22px; cursor: pointer; padding: 5px; }
         
-        /* ড্রপডাউন মেনু পপআপ */
         .dropdown-menu { display: none; position: absolute; right: 10px; top: 45px; background: #1e293b; border: 1px solid #475569; border-radius: 8px; width: 210px; box-shadow: 0 4px 12px rgba(0,0,0,0.5); z-index: 1000; text-align: left; }
         .dropdown-menu button { background: none; border: none; color: #fff; padding: 11px 15px; width: 100%; text-align: left; cursor: pointer; font-size: 14px; border-bottom: 1px solid #334155; }
         .dropdown-menu button:hover { background: #334155; color: #38bdf8; }
@@ -32,12 +30,10 @@
 </head>
 <body>
 
-    <!-- হেডার এবং থ্রি-ডট মেনু -->
     <div class="header-container">
         <h2>🔥 Like4Like App</h2>
         <button class="menu-icon-btn" onclick="toggleMenu()">⋮</button>
         
-        <!-- ড্রপডাউন মেনু (Like4Like স্টাইল অনুযায়ী API এবং Blog বাদ দেওয়া হয়েছে) -->
         <div id="dropdownMenu" class="dropdown-menu">
             <button onclick="switchTab('add'); toggleMenu();">⚙️ Add/Manage Pages</button>
             <button onclick="alert('Free Credits section coming soon!'); toggleMenu();">🪙 Free Credits</button>
@@ -50,7 +46,6 @@
         </div>
     </div>
 
-    <!-- মূল ট্যাব মেনু -->
     <div class="tab-menu">
         <button class="tab-btn active" onclick="switchTab('earn')">Earn</button>
         <button class="tab-btn" onclick="switchTab('add')">Add Task</button>
@@ -91,14 +86,27 @@
         </div>
     </div>
 
-    <!-- ৩. প্রোফাইল ট্যাব -->
+    <!-- ৩. প্রোফাইল ট্যাব (পাসওয়ার্ড সেট/পরিবর্তন অপশন সহ) -->
     <div id="tab-profile" class="tab-content" style="display:none;">
         <div class="card">
             <h3>👤 My Profile</h3>
             <p><b>Telegram ID:</b> <span id="profile-id" style="color: #38bdf8;"></span></p>
             <p><b>Total Balance:</b> <span id="profile-points" style="color: #4ade80;"></span> Points</p>
             
-            <h4 style="margin-top: 15px;">⭐ Buy Credits with Telegram Stars</h4>
+            <hr style="border-color: #334155; margin: 15px 0;">
+
+            <div id="password-section">
+                <h4 id="password-title" style="color: #38bdf8; margin-bottom: 8px;">🔐 Set Website Password</h4>
+                <div id="old-pass-group" style="display:none;">
+                    <label>Old Password:</label>
+                    <input type="password" id="oldPassword" placeholder="Enter old password">
+                </div>
+                <label>New Password:</label>
+                <input type="password" id="newPassword" placeholder="Enter password">
+                <button class="btn" id="pass-btn" onclick="handlePasswordAction()" style="width: 100%; margin-top: 8px; background: #10b981;">Set Password</button>
+            </div>
+
+            <h4 style="margin-top: 20px;">⭐ Buy Credits with Telegram Stars</h4>
             <button class="btn" onclick="buyStars('small')" style="margin-bottom: 5px; width:100%;">Buy 100 Pts (5 Stars)</button>
             <button class="btn" onclick="buyStars('medium')" style="margin-bottom: 5px; width:100%;">Buy 500 Pts (20 Stars)</button>
             <button class="btn" onclick="buyStars('large')" style="width:100%;">Buy 1200 Pts (40 Stars)</button>
@@ -122,6 +130,7 @@
         tg.expand();
 
         const telegramId = tg.initDataUnsafe?.user?.id ? tg.initDataUnsafe.user.id.toString() : "test_admin_123";
+        let hasPasswordSet = false;
 
         function toggleMenu() {
             const menu = document.getElementById('dropdownMenu');
@@ -151,12 +160,68 @@
                 document.getElementById('profile-points').innerText = data.points || 0;
                 document.getElementById('profile-id').innerText = data.telegramId;
 
-                // যদি ইউজার এডমিন হয়, তবে ড্রপডাউন মেনুতে এডমিন প্যানেল শো করবে
+                if (data.password && data.password !== "") {
+                    hasPasswordSet = true;
+                    document.getElementById('password-title').innerText = "🔄 Change Website Password";
+                    document.getElementById('old-pass-group').style.display = 'block';
+                    document.getElementById('pass-btn').innerText = "Change Password";
+                } else {
+                    hasPasswordSet = false;
+                    document.getElementById('password-title').innerText = "🔐 Set Website Password";
+                    document.getElementById('old-pass-group').style.display = 'none';
+                    document.getElementById('pass-btn').innerText = "Set Password";
+                }
+
                 if(data.isAdmin) {
                     document.getElementById('admin-dropdown-btn').style.display = 'block';
                 }
             } catch (err) {
                 console.error(err);
+            }
+        }
+
+        async function handlePasswordAction() {
+            const newPassword = document.getElementById('newPassword').value;
+            if (!newPassword) {
+                alert("Please enter a new password!");
+                return;
+            }
+
+            if (!hasPasswordSet) {
+                const res = await fetch('/api/set-password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ telegramId, password: newPassword })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    alert("Password set successfully!");
+                    document.getElementById('newPassword').value = '';
+                    fetchUserData();
+                } else {
+                    alert(data.error || "Failed");
+                }
+            } else {
+                const oldPassword = document.getElementById('oldPassword').value;
+                if (!oldPassword) {
+                    alert("Please enter your old password!");
+                    return;
+                }
+
+                const res = await fetch('/api/change-password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ telegramId, oldPassword, newPassword })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    alert("Password changed successfully!");
+                    document.getElementById('oldPassword').value = '';
+                    document.getElementById('newPassword').value = '';
+                    fetchUserData();
+                } else {
+                    alert(data.error || "Failed");
+                }
             }
         }
 
@@ -167,7 +232,7 @@
                 const listDiv = document.getElementById('tasks-list');
                 
                 if(!Array.isArray(tasks) || tasks.length === 0) {
-                    listDiv.innerHTML = '<p style="color:#94a3b8; text-align:center;">No tasks available right now. Check back later!</p>';
+                    listDiv.innerHTML = '<p style="color:#94a3b8; text-align:center;">No tasks available right now.</p>';
                     return;
                 }
 
@@ -240,7 +305,7 @@
             });
             const data = await res.json();
             if(data.success) {
-                alert("Credits added successfully via Telegram Stars!");
+                alert("Credits added successfully!");
                 fetchUserData();
             }
         }
@@ -258,7 +323,7 @@
             });
             const data = await res.json();
             if(data.success) {
-                alert(`Successfully sent ${amount} points to user! New balance: ${data.newBalance}`);
+                alert(`Successfully sent ${amount} points! New balance: ${data.newBalance}`);
                 document.getElementById('targetUserId').value = '';
             } else {
                 alert(data.error || "Action failed");
