@@ -86,7 +86,7 @@
         </div>
     </div>
 
-    <!-- ৩. প্রোফাইল ট্যাব (পাসওয়ার্ড সেট/পরিবর্তন অপশন সহ) -->
+    <!-- ৩. প্রোফাইল ট্যাব (পাসওয়ার্ড সেট/পরিবর্তন অপশন সহ) -->
     <div id="tab-profile" class="tab-content" style="display:none;">
         <div class="card">
             <h3>👤 My Profile</h3>
@@ -126,10 +126,12 @@
     </div>
 
     <script>
+        // ব্যাকএন্ড সার্ভারের বেস ইউআরএল
+        const SERVER_URL = "https://telegram-mini-app-8y39.onrender.com";
+
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        // টেলিগ্রাম থেকে আইডি নিবে, না থাকলে লোকালস্টোরেজ বা টেস্ট আইডি ব্যবহার করবে
         const telegramId = tg.initDataUnsafe?.user?.id ? tg.initDataUnsafe.user.id.toString() : (localStorage.getItem('telegramId') || "test_admin_123");
         let hasPasswordSet = false;
 
@@ -161,7 +163,7 @@
 
         async function fetchUserData() {
             try {
-                const res = await fetch(`/api/user/${telegramId}`);
+                const res = await fetch(`${SERVER_URL}/api/user/${telegramId}`);
                 const data = await res.json();
                 document.getElementById('balance').innerText = `${data.points || 0} Points`;
                 document.getElementById('profile-points').innerText = data.points || 0;
@@ -195,7 +197,7 @@
             }
 
             if (!hasPasswordSet) {
-                const res = await fetch('/api/set-password', {
+                const res = await fetch(`${SERVER_URL}/api/set-password`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ telegramId, password: newPassword })
@@ -215,7 +217,7 @@
                     return;
                 }
 
-                const res = await fetch('/api/change-password', {
+                const res = await fetch(`${SERVER_URL}/api/change-password`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ telegramId, oldPassword, newPassword })
@@ -234,7 +236,7 @@
 
         async function fetchTasks() {
             try {
-                const res = await fetch(`/api/tasks/${telegramId}`);
+                const res = await fetch(`${SERVER_URL}/api/tasks/${telegramId}`);
                 const tasks = await res.json();
                 const listDiv = document.getElementById('tasks-list');
                 
@@ -261,7 +263,7 @@
         }
 
         async function skipTask(taskId) {
-            await fetch('/api/tasks/skip', {
+            await fetch(`${SERVER_URL}/api/tasks/skip`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ telegramId, taskId })
@@ -270,7 +272,7 @@
         }
 
         async function completeTask(taskId) {
-            await fetch('/api/tasks/complete', {
+            await fetch(`${SERVER_URL}/api/tasks/complete`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ telegramId, taskId })
@@ -289,7 +291,7 @@
 
             if(!link) { alert("Enter link!"); return; }
 
-            const res = await fetch('/api/tasks/create', {
+            const res = await fetch(`${SERVER_URL}/api/tasks/create`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ telegramId, platform, taskType, link, reward })
@@ -305,7 +307,7 @@
         }
 
         async function buyStars(packageType) {
-            const res = await fetch('/api/buy-credits', {
+            const res = await fetch(`${SERVER_URL}/api/buy-credits`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ telegramId, packageType })
@@ -323,7 +325,7 @@
 
             if(!targetUserId) { alert("Enter target user ID!"); return; }
 
-            const res = await fetch('/api/admin/give-credit', {
+            const res = await fetch(`${SERVER_URL}/api/admin/give-credit`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ adminId: telegramId, targetTelegramId: targetUserId, amount })
