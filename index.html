@@ -97,13 +97,25 @@
                 <input type="hidden" id="platform" value="telegram">
                 <input type="hidden" id="taskType" value="Channel Join">
 
+                <div id="telegram-fields">
+                    <label>Telegram Channel / Group ID (e.g. @username or -100xxx):</label>
+                    <input type="text" id="targetChannelId" placeholder="@channel_username">
+                </div>
+
                 <label>Target Link / URL:</label>
                 <input type="text" id="taskLink" placeholder="https://...">
 
                 <label>Reward per action (Points): (Min 5)</label>
                 <input type="number" id="taskReward" value="5" min="5">
 
-                <button class="btn" onclick="createTask()" style="width: 100%; margin-top: 10px; background: #2563eb; font-weight: bold;">Submit Task</button>
+                <!-- টেলিগ্রাম টাস্ক ক্রিয়েটের জন্য বট অ্যাডমিন প্রুফ স্ক্রিনশট ইনপুট -->
+                <div id="telegram-proof-container" style="margin-top: 10px;">
+                    <label style="color: #eab308; font-size: 13px;">🤖 Bot Admin Proof Screenshot:</label>
+                    <input type="file" id="taskProofFile" accept="image/*">
+                    <small style="color: #94a3b8; display: block; font-size: 11px;">বটকে এই চ্যানেলে অ্যাডমিন বানিয়েছেন তার একটি স্ক্রিনশট দিন (অ্যাডমিন অ্যাপ্রুভ করলে টাস্ক লাইভ হবে)।</small>
+                </div>
+
+                <button class="btn" onclick="createTask()" style="width: 100%; margin-top: 12px; background: #2563eb; font-weight: bold;">Submit Task</button>
             </div>
         </div>
     </div>
@@ -190,6 +202,10 @@
             <label>Credit Amount:</label>
             <input type="number" id="creditAmount" value="50">
             <button class="btn" onclick="giveFreeCredit()" style="background: #eab308; color: #000; width: 100%; font-weight: bold; margin-top: 5px;">Give Free Credit</button>
+            
+            <hr style="border-color: #334155; margin: 15px 0;">
+            <h4 style="color: #38bdf8;">📥 Pending Approvals (Tasks & Proofs)</h4>
+            <div id="admin-requests-container" style="font-size: 13px;">Loading pending requests...</div>
         </div>
     </div>
 
@@ -245,6 +261,9 @@
             if(tabName === 'my-tasks') {
                 fetchMyTasks();
             }
+            if(tabName === 'admin') {
+                fetchAdminPendingRequests();
+            }
             
             document.querySelectorAll('.tab-btn').forEach(el => {
                 if(el.getAttribute('onclick')?.includes(`'${tabName}'`)) {
@@ -264,6 +283,14 @@
             document.getElementById('platform').value = plat;
             document.getElementById('taskType').value = type;
             document.getElementById('selected-type').innerText = `${plat.toUpperCase()} - ${type}`;
+
+            if(plat === 'telegram') {
+                document.getElementById('telegram-fields').style.display = 'block';
+                document.getElementById('telegram-proof-container').style.display = 'block';
+            } else {
+                document.getElementById('telegram-fields').style.display = 'none';
+                document.getElementById('telegram-proof-container').style.display = 'none';
+            }
         }
 
         function selectMoreOption() {
@@ -271,6 +298,8 @@
             document.getElementById('platform').value = 'custom';
             document.getElementById('taskType').value = 'Custom Task';
             document.getElementById('selected-type').innerText = `CUSTOM OPTION`;
+            document.getElementById('telegram-fields').style.display = 'none';
+            document.getElementById('telegram-proof-container').style.display = 'none';
         }
 
         async function fetchUserData() {
@@ -370,52 +399,104 @@
                     return;
                 }
 
-                listDiv.innerHTML = tasks.map(t => `
-                    <div class="task-item" id="task-card-${t._id}">
-                        <div style="text-align: left; font-size: 13px; margin-bottom: 8px;">
-                            <b>${t.platform.toUpperCase()}</b> - ${t.taskType}<br>
-                            <span style="color: #4ade80;">Reward: +${t.reward} pts</span>
-                        </div>
-                        <div class="btn-group" id="btn-group-${t._id}">
-                            <a class="btn" href="${t.link}" target="_blank" onclick="startTaskTimer('${t._id}')">Visit Link</a>
-                            <button class="btn skip-btn" onclick="skipTask('${t._id}')">Skip</button>
-                        </div>
-                        <div id="timer-container-${t._id}" style="margin-top: 8px; display: none; text-align: center;">
-                            <span id="timer-text-${t._id}" style="font-size: 12px; color: #eab308; display: block; margin-bottom: 5px;"></span>
-                            <button class="btn" id="verify-btn-${t._id}" onclick="completeTask('${t._id}')" style="background: #10b981; display: none; width: 100%;">Verify & Claim</button>
-                        </div>
-                    </div>
-                `).join('');
+                listDiv.innerHTML = tasks.map(t => {
+                    if (t.platform === 'telegram') {
+                        // টেলিগ্রাম টাস্কের জন্য অটো-ভেরিফিকেশন ইন্টারফেস (কোনো স্ক্রিনশট লাগবে না)
+                        return `
+                            <div class="task-item" id="task-card-${t._id}">
+                                <div style="text-align: left; font-size: 13px; margin-bottom: 8px;">
+                                    <b>${t.platform.toUpperCase()}</b> - ${t.taskType}<br>
+                                    <span style="color: #4ade80;">Reward: +${t.reward} pts</span>
+                                </div>
+                                <div class="btn-group">
+                                    <a class="btn" href="${t.link}" target="_blank">Join Channel</a>
+                                    <button class="btn" style="background: #10b981;" onclick="verifyTelegramTask('${t._id}')">Verify & Claim</button>
+                                    <button class="btn skip-btn" onclick="skipTask('${t._id}')">Skip</button>
+                                </div>
+                            </div>
+                        `;
+                    } else {
+                        // অন্যান্য প্ল্যাটফর্মের টাস্কের জন্য স্ক্রিনশট প্রুফ আপলোড ও সাবমিশন ইন্টারফেস
+                        return `
+                            <div class="task-item" id="task-card-${t._id}">
+                                <div style="text-align: left; font-size: 13px; margin-bottom: 8px;">
+                                    <b>${t.platform.toUpperCase()}</b> - ${t.taskType}<br>
+                                    <span style="color: #4ade80;">Reward: +${t.reward} pts</span>
+                                </div>
+                                <div class="btn-group" style="margin-bottom: 8px;">
+                                    <a class="btn" href="${t.link}" target="_blank" onclick="showProofSection('${t._id}')">Visit Link</a>
+                                    <button class="btn skip-btn" onclick="skipTask('${t._id}')">Skip</button>
+                                </div>
+                                <div id="proof-section-${t._id}" style="display:none; background: #1e293b; padding: 8px; border-radius: 5px; margin-top: 5px;">
+                                    <label style="font-size: 11px; color: #eab308;">Upload Completion Screenshot:</label>
+                                    <input type="file" id="proof-file-${t._id}" accept="image/*" style="font-size: 11px; margin-bottom: 5px;">
+                                    <button class="btn" style="background: #10b981; width: 100%; font-size: 12px;" onclick="submitTaskProof('${t._id}')">Submit Proof & Claim</button>
+                                </div>
+                            </div>
+                        `;
+                    }
+                }).join('');
             } catch (err) {
                 document.getElementById('tasks-list').innerHTML = 'Error loading tasks';
             }
         }
 
-        // ৬ সেকেন্ডের অ্যান্টি-চিট সিকিউরিটি টাইমার
-        function startTaskTimer(taskId) {
-            const timerContainer = document.getElementById(`timer-container-${taskId}`);
-            const timerText = document.getElementById(`timer-text-${taskId}`);
-            const verifyBtn = document.getElementById(`verify-btn-${taskId}`);
+        function showProofSection(taskId) {
+            document.getElementById(`proof-section-${taskId}`).style.display = 'block';
+        }
 
-            timerContainer.style.display = 'block';
-            verifyBtn.style.display = 'block';
-            verifyBtn.style.opacity = '0.5';
-            verifyBtn.style.pointerEvents = 'none';
-
-            let timeLeft = 6;
-            timerText.innerText = `Please wait ${timeLeft} seconds to verify...`;
-
-            let countdown = setInterval(() => {
-                timeLeft--;
-                if (timeLeft > 0) {
-                    timerText.innerText = `Please wait ${timeLeft} seconds to verify...`;
+        // টেলিগ্রাম টাস্ক অটো ভেরিফাই API কল
+        async function verifyTelegramTask(taskId) {
+            try {
+                const res = await fetch(`${SERVER_URL}/api/tasks/verify-telegram`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ telegramId, taskId })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    alert(data.message);
+                    fetchUserData();
+                    fetchTasks();
                 } else {
-                    clearInterval(countdown);
-                    timerText.innerText = "You can verify now!";
-                    verifyBtn.style.opacity = '1';
-                    verifyBtn.style.pointerEvents = 'auto';
+                    alert(data.error || "Verification failed");
                 }
-            }, 1000);
+            } catch (err) {
+                alert("Server connection error!");
+            }
+        }
+
+        // অন্যান্য প্ল্যাটফর্মের টাস্ক প্রুফ সাবমিট API কল
+        async function submitTaskProof(taskId) {
+            const fileInput = document.getElementById(`proof-file-${taskId}`);
+            const file = fileInput.files[0];
+
+            if (!file) {
+                alert("Please select a screenshot proof!");
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = async function () {
+                const proofUrl = reader.result; // Base64 or Link
+                try {
+                    const res = await fetch(`${SERVER_URL}/api/tasks/submit-proof`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ telegramId, taskId, proofUrl })
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                        alert(data.message);
+                        fetchTasks();
+                    } else {
+                        alert(data.error || "Failed to submit proof");
+                    }
+                } catch (err) {
+                    alert("Server connection error!");
+                }
+            };
         }
 
         async function skipTask(taskId) {
@@ -427,28 +508,7 @@
             fetchTasks();
         }
 
-        async function completeTask(taskId) {
-            try {
-                const res = await fetch(`${SERVER_URL}/api/tasks/complete`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ telegramId, taskId })
-                });
-                const data = await res.json();
-                if (data.success) {
-                    alert("Task verified & points added successfully!");
-                    fetchUserData();
-                    fetchTasks();
-                } else {
-                    alert(data.error || "Failed to complete task");
-                    fetchTasks();
-                }
-            } catch (err) {
-                alert("Server connection error!");
-            }
-        }
-
-        // মাই টাস্কস লিস্টে কমপ্লিট কাউন্ট (Completed Count) শো করা
+        // মাই টাস্কস লিস্ট
         async function fetchMyTasks() {
             try {
                 const res = await fetch(`${SERVER_URL}/api/my-tasks/${telegramId}`);
@@ -515,11 +575,13 @@
             }
         }
 
+        // টাস্ক ক্রিয়েট ফাংশন (টেলিগ্রামের ক্ষেত্রে স্ক্রিনশট প্রুফ সহ)
         async function createTask() {
             let platform = document.getElementById('platform').value;
             let taskType = document.getElementById('taskType').value;
             const link = document.getElementById('taskLink').value;
             const reward = Number(document.getElementById('taskReward').value);
+            const targetChannelId = document.getElementById('targetChannelId').value;
 
             if (reward < 5) {
                 alert("Minimum reward per action must be at least 5 points!");
@@ -538,22 +600,137 @@
 
             if(!link) { alert("Enter link!"); return; }
 
-            const res = await fetch(`${SERVER_URL}/api/tasks/create`, {
+            if (platform === 'telegram') {
+                if (!targetChannelId) {
+                    alert("Please enter your Telegram Channel/Group ID or Username!");
+                    return;
+                }
+                const fileInput = document.getElementById('taskProofFile');
+                const file = fileInput.files[0];
+                if (!file) {
+                    alert("Please upload the screenshot proving the bot is an admin!");
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = async function() {
+                    const proofUrl = reader.result;
+                    const res = await fetch(`${SERVER_URL}/api/tasks/create-telegram-request`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ telegramId, taskType, link, reward, targetChannelId, proofUrl })
+                    });
+                    const data = await res.json();
+                    if(data.success) {
+                        alert(data.message);
+                        document.getElementById('taskLink').value = '';
+                        document.getElementById('targetChannelId').value = '';
+                        fileInput.value = '';
+                        fetchUserData();
+                    } else {
+                        alert(data.error || "Failed");
+                    }
+                };
+            } else {
+                // অন্যান্য প্ল্যাটফর্মের টাস্ক সরাসরি তৈরি হবে (কোনো প্রুফ লাগবে না)
+                const res = await fetch(`${SERVER_URL}/api/tasks/create`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ telegramId, platform, taskType, link, reward })
+                });
+                const data = await res.json();
+                if(data.success) {
+                    alert("Task created successfully!");
+                    document.getElementById('taskLink').value = '';
+                    fetchUserData();
+                } else {
+                    alert(data.error || "Failed");
+                }
+            }
+        }
+
+        // অ্যাডমিন প্যানেলে পেন্ডিং রিকোয়েস্টগুলো লোড করার ফাংশন
+        async function fetchAdminPendingRequests() {
+            const container = document.getElementById('admin-requests-container');
+            container.innerHTML = "Loading...";
+
+            try {
+                // ১. টেলিগ্রাম টাস্ক ক্রিয়েট রিকোয়েস্ট ফেচ
+                const res1 = await fetch(`${SERVER_URL}/api/admin/pending-task-creations`);
+                const data1 = await res1.json();
+
+                // ২. অন্যান্য প্ল্যাটফর্মের টাস্ক কমপ্লিট প্রুফ ফেচ
+                const res2 = await fetch(`${SERVER_URL}/api/admin/pending-proofs`);
+                const data2 = await res2.json();
+
+                let html = "";
+
+                // টেলিগ্রাম টাস্ক ক্রিয়েট রিকোয়েস্ট লিস্ট
+                html += "<h4>Telegram Task Creation Requests:</h4>";
+                if (data1.requests && data1.requests.length > 0) {
+                    data1.requests.forEach(r => {
+                        html += `
+                            <div style="background:#0f172a; padding:8px; margin-bottom:6px; border-radius:5px; text-align:left;">
+                                <p><b>User ID:</b> ${r.userId}</p>
+                                <p><b>Channel:</b> ${r.taskData.targetChannelId}</p>
+                                <p><b>Reward:</b> ${r.taskData.reward} pts</p>
+                                <p><b>Admin Proof:</b></p>
+                                <img src="${r.proofUrl}" style="max-width:100px; border-radius:4px; display:block; margin-bottom:5px;">
+                                <button class="btn" style="background:green; padding:4px 8px;" onclick="reviewTelegramTask('${r._id}', 'approve')">Approve</button>
+                                <button class="btn skip-btn" style="padding:4px 8px;" onclick="reviewTelegramTask('${r._id}', 'reject')">Reject</button>
+                            </div>
+                        `;
+                    });
+                } else {
+                    html += "<p style='color:#94a3b8;'>No pending telegram task requests.</p>";
+                }
+
+                // অন্যান্য প্ল্যাটফর্মের কমপ্লিট প্রুফ লিস্ট
+                html += "<h4 style='margin-top:15px;'>Task Completion Proofs (YouTube/FB):</h4>";
+                if (data2.proofs && data2.proofs.length > 0) {
+                    data2.proofs.forEach(p => {
+                        html += `
+                            <div style="background:#0f172a; padding:8px; margin-bottom:6px; border-radius:5px; text-align:left;">
+                                <p><b>User ID:</b> ${p.userId}</p>
+                                <p><b>Task ID:</b> ${p.taskId?._id || 'N/A'} (${p.taskId?.platform || 'Task'})</p>
+                                <p><b>Completion Proof:</b></p>
+                                <img src="${p.proofUrl}" style="max-width:100px; border-radius:4px; display:block; margin-bottom:5px;">
+                                <button class="btn" style="background:green; padding:4px 8px;" onclick="reviewCompletionProof('${p._id}', 'approve')">Approve</button>
+                                <button class="btn skip-btn" style="padding:4px 8px;" onclick="reviewCompletionProof('${p._id}', 'reject')">Reject</button>
+                            </div>
+                        `;
+                    });
+                } else {
+                    html += "<p style='color:#94a3b8;'>No pending completion proofs.</p>";
+                }
+
+                container.innerHTML = html;
+            } catch (err) {
+                container.innerHTML = "Error loading requests.";
+            }
+        }
+
+        async function reviewTelegramTask(submissionId, action) {
+            const res = await fetch(`${SERVER_URL}/api/admin/review-task-creation`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ telegramId, platform, taskType, link, reward })
+                body: JSON.stringify({ submissionId, action })
             });
             const data = await res.json();
-            if(data.success) {
-                alert("Task created successfully!");
-                document.getElementById('taskLink').value = '';
-                if(document.getElementById('customTaskName')) {
-                    document.getElementById('customTaskName').value = '';
-                }
-                fetchUserData();
-            } else {
-                alert(data.error || "Failed");
-            }
+            alert(data.message);
+            fetchAdminPendingRequests();
+        }
+
+        async function reviewCompletionProof(submissionId, action) {
+            const res = await fetch(`${SERVER_URL}/api/admin/review-submission`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ submissionId, action })
+            });
+            const data = await res.json();
+            alert(data.message);
+            fetchAdminPendingRequests();
         }
 
         async function buyStars(packageType) {
