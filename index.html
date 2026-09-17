@@ -20,8 +20,8 @@
         a.btn, button.btn { background: #3b82f6; color: white; padding: 6px 10px; border: none; border-radius: 5px; text-decoration: none; font-size: 13px; cursor: pointer; text-align: center; flex: 1; }
         button.skip-btn { background: #ef4444; }
         input, select { width: 100%; padding: 7px; margin: 4px 0 8px 0; border-radius: 5px; border: 1px solid #475569; background: #0f172a; color: #fff; box-sizing: border-box; }
-        .tab-menu { display: flex; justify-content: space-around; background: #1e293b; padding: 8px; border-radius: 8px; margin-bottom: 12px; }
-        .tab-btn { background: none; border: none; color: #94a3b8; font-weight: bold; cursor: pointer; font-size: 12px; }
+        .tab-menu { display: flex; justify-content: space-around; background: #1e293b; padding: 8px; border-radius: 8px; margin-bottom: 12px; overflow-x: auto; }
+        .tab-btn { background: none; border: none; color: #94a3b8; font-weight: bold; cursor: pointer; font-size: 12px; white-space: nowrap; padding: 5px; }
         .tab-btn.active { color: #38bdf8; border-bottom: 2px solid #38bdf8; }
     </style>
 </head>
@@ -32,9 +32,10 @@
         <button class="menu-icon-btn" onclick="toggleMenu()">⋮</button>
         <div id="dropdownMenu" class="dropdown-menu">
             <button onclick="switchTab('add'); toggleMenu();">⚙️ Add Task</button>
-            <button onclick="switchTab('my-tasks'); toggleMenu();">📋 My Tasks & Reports</button>
-            <button onclick="switchTab('free-credits'); toggleMenu();">🪙 Free Credits</button>
+            <button onclick="switchTab('my-tasks'); toggleMenu();">📋 My Tasks</button>
+            <button onclick="switchTab('free-credits'); toggleMenu();">🪙 Free Credits & Stars</button>
             <button onclick="switchTab('profile'); toggleMenu();">👤 Profile</button>
+            <button id="adminMenuBtn" style="display:none;" onclick="switchTab('admin'); toggleMenu();">🛡️ Admin Panel</button>
             <button onclick="logoutUser(); toggleMenu();">🚪 Logout</button>
         </div>
     </div>
@@ -43,8 +44,9 @@
         <button class="tab-btn active" onclick="switchTab('earn')">Earn</button>
         <button class="tab-btn" onclick="switchTab('add')">Add Task</button>
         <button class="tab-btn" onclick="switchTab('my-tasks')">My Tasks</button>
-        <button class="tab-btn" onclick="switchTab('free-credits')">Free Credits</button>
+        <button class="tab-btn" onclick="switchTab('free-credits')">Free & Stars</button>
         <button class="tab-btn" onclick="switchTab('profile')">Profile</button>
+        <button id="adminTabBtn" class="tab-btn" style="display:none; color: #f59e0b;" onclick="switchTab('admin')">Admin</button>
     </div>
 
     <!-- ১. আর্ন ট্যাব -->
@@ -52,6 +54,7 @@
         <div class="card" style="text-align: center;">
             <h3>My Balance</h3>
             <p id="balance" style="font-size: 20px; font-weight: bold; color: #38bdf8;">Loading...</p>
+            <p style="font-size: 14px; color: #f59e0b;">⭐ Stars: <span id="star-balance">0</span></p>
         </div>
         <div class="card">
             <h3>📋 Available Tasks (Randomized)</h3>
@@ -85,19 +88,39 @@
         </div>
     </div>
 
-    <!-- ৩. মাই টাস্কস এবং রিপোর্ট ট্যাব -->
+    <!-- ৩. মাই টাস্কস ট্যাব -->
     <div id="tab-my-tasks" class="tab-content" style="display:none;">
         <div class="card">
-            <h3 style="color: #38bdf8; text-align: center; margin-bottom: 12px;">📋 My Created Tasks & Reports</h3>
+            <h3 style="color: #38bdf8; text-align: center; margin-bottom: 12px;">📋 My Created Tasks</h3>
             <div id="my-tasks-list">Loading your tasks...</div>
         </div>
     </div>
 
-    <!-- ৪. ফ্রি ক্রেডিট ট্যাব -->
+    <!-- ৪. ফ্রি ক্রেডিট ও স্টার উইথড্র ট্যাব -->
     <div id="tab-free-credits" class="tab-content" style="display:none;">
         <div class="card" style="text-align: center;">
             <h3 style="color: #38bdf8;">🪙 Daily Login Bonus</h3>
             <button class="btn" onclick="claimDailyBonus()" style="background: #10b981; font-weight: bold; width: 100%; padding: 10px;">Claim 5 Points Bonus</button>
+        </div>
+
+        <div class="card">
+            <h3 style="color: #f59e0b; text-align: center;">⭐ Buy Points with Telegram Stars</h3>
+            <div style="display: flex; gap: 5px; margin-top: 10px;">
+                <button class="btn" style="background: #8b5cf6;" onclick="buyStarsPackage('small')">100 Pts (5 Stars)</button>
+                <button class="btn" style="background: #8b5cf6;" onclick="buyStarsPackage('medium')">500 Pts (20 Stars)</button>
+                <button class="btn" style="background: #8b5cf6;" onclick="buyStarsPackage('large')">1200 Pts (40 Stars)</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3 style="color: #38bdf8; text-align: center;">💸 Withdraw Stars (Min 500)</h3>
+            <label>Method (e.g., bKash / USDT / Telegram Stars):</label>
+            <input type="text" id="withdrawMethod" placeholder="bKash / Wallet">
+            <label>Account Number / Details:</label>
+            <input type="text" id="withdrawAccount" placeholder="Account info">
+            <label>Amount (Stars):</label>
+            <input type="number" id="withdrawAmount" placeholder="Min 500" min="500">
+            <button class="btn" style="background: #10b981; width: 100%; margin-top: 5px;" onclick="requestWithdrawal()">Submit Withdrawal</button>
         </div>
     </div>
 
@@ -108,20 +131,43 @@
             <p><b>Telegram ID:</b> <span id="profile-id" style="color: #38bdf8;"></span></p>
             <p><b>Gmail:</b> <span id="profile-email" style="color: #eab308;">Not Set</span></p>
             <p><b>Total Balance:</b> <span id="profile-points" style="color: #4ade80;"></span> Points</p>
+            <p><b>Star Balance:</b> <span id="profile-stars" style="color: #f59e0b;"></span> Stars</p>
             
             <hr style="border-color: #334155; margin: 15px 0;">
-            <h4 style="color: #38bdf8; margin-bottom: 8px;">🔐 Set / Change Password</h4>
+            <h4 style="color: #38bdf8; margin-bottom: 8px;">🔐 Change Password</h4>
+            <input type="password" id="oldPassword" placeholder="Old Password (leave blank if none)">
             <input type="password" id="newPassword" placeholder="New Password">
-            <button class="btn" onclick="handlePasswordAction()" style="width: 100%; margin-top: 8px; background: #10b981;">Save Password</button>
+            <button class="btn" onclick="handleChangePassword()" style="width: 100%; margin-top: 8px; background: #10b981;">Update Password</button>
+        </div>
+    </div>
+
+    <!-- ৬. অ্যাডমিন প্যানেল ট্যাব -->
+    <div id="tab-admin" class="tab-content" style="display:none;">
+        <div class="card">
+            <h3 style="color: #f59e0b; text-align: center;">🛡️ Admin Panel - Give Credit</h3>
+            <label>Target User Telegram ID:</label>
+            <input type="text" id="adminTargetId" placeholder="User Telegram ID">
+            <label>Amount of Points:</label>
+            <input type="number" id="adminCreditAmount" placeholder="Points amount">
+            <button class="btn" style="background: #d97706; width: 100%; margin-top: 8px;" onclick="adminGiveCredit()">Send Points</button>
         </div>
     </div>
 
     <script>
         const SERVER_URL = "https://telegram-mini-app-8y39.onrender.com";
+        const ADMIN_ID = "8351272061"; // সার্ভারের অ্যাডমিন আইডি
         const tg = window.Telegram.WebApp;
         tg.expand();
 
         const telegramId = tg.initDataUnsafe?.user?.id ? tg.initDataUnsafe.user.id.toString() : "test_admin_123";
+
+        // অ্যাডমিন চেক করে ট্যাব শো করা
+        function checkAdminAccess(id) {
+            if (id === ADMIN_ID) {
+                document.getElementById('adminTabBtn').style.display = 'block';
+                document.getElementById('adminMenuBtn').style.display = 'block';
+            }
+        }
 
         async function registerUser() {
             try {
@@ -161,13 +207,17 @@
                 const res = await fetch(`${SERVER_URL}/api/user/${telegramId}`);
                 const data = await res.json();
                 document.getElementById('balance').innerText = `${data.points || 0} Points`;
+                document.getElementById('star-balance').innerText = data.stars || 0;
                 document.getElementById('profile-points').innerText = data.points || 0;
+                document.getElementById('profile-stars').innerText = data.stars || 0;
                 document.getElementById('profile-id').innerText = data.telegramId;
                 document.getElementById('profile-email').innerText = data.email || "Not Set";
+
+                checkAdminAccess(data.telegramId);
             } catch (err) { console.error(err); }
         }
 
-        // টাস্ক লিংক ক্লিক করলে সময় রেকর্ড হবে
+        // টাস্ক লিংক ক্লিক করলে সময় সার্ভারে রেকর্ড হবে
         async function handleTaskClick(taskId, link) {
             await fetch(`${SERVER_URL}/api/tasks/click`, {
                 method: 'POST',
@@ -177,17 +227,17 @@
             window.open(link, '_blank');
         }
 
-        // ৫ সেকেন্ড সময় যাচাই করে ভেরিফাই করা
+        // ৫ সেকেন্ড সময় ও টেলিগ্রাম মেম্বারশিপ যাচাই করে ভেরিফাই করা (/api/tasks/complete)
         async function verifyTask(taskId) {
             try {
-                const res = await fetch(`${SERVER_URL}/api/tasks/verify`, {
+                const res = await fetch(`${SERVER_URL}/api/tasks/complete`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ telegramId, taskId })
                 });
                 const data = await res.json();
                 if (data.success) {
-                    alert(data.message);
+                    alert("Task verified successfully! Points added.");
                     fetchUserData();
                     fetchTasks();
                 } else {
@@ -249,7 +299,6 @@
                         <span style="color: #38bdf8;">${t.link}</span>
                         <div style="margin-top: 6px; display: flex; gap: 5px;">
                             <button class="btn skip-btn" onclick="deleteTask('${t._id}')" style="padding: 4px;">Delete</button>
-                            <button class="btn" style="background: #eab308; color:#000; padding: 4px;" onclick="reportTaskUser('${t._id}', '${t.ownerId}')">Report Cheater</button>
                         </div>
                     </div>
                 `).join('');
@@ -260,18 +309,6 @@
             if(!confirm("Delete this task?")) return;
             await fetch(`${SERVER_URL}/api/tasks/delete/${taskId}`, { method: 'DELETE' });
             fetchMyTasks();
-        }
-
-        async function reportTaskUser(taskId, ownerId) {
-            const reason = prompt("Enter reason for report (e.g., took credit without doing task):");
-            if(!reason) return;
-            const res = await fetch(`${SERVER_URL}/api/tasks/report`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ taskId, ownerId, reportedUserId: telegramId, reason })
-            });
-            const data = await res.json();
-            alert(data.message);
         }
 
         async function createTask() {
@@ -302,19 +339,84 @@
                 body: JSON.stringify({ telegramId })
             });
             const data = await res.json();
-            if(data.success) { alert("Bonus claimed!"); fetchUserData(); }
+            if(data.success) { alert("Bonus claimed successfully!"); fetchUserData(); }
             else { alert(data.error); }
         }
 
-        async function handlePasswordAction() {
-            const password = document.getElementById('newPassword').value;
-            if(!password) { alert("Enter password"); return; }
-            await fetch(`${SERVER_URL}/api/set-password`, {
+        async function buyStarsPackage(packageType) {
+            try {
+                const res = await fetch(`${SERVER_URL}/api/create-invoice`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ telegramId, packageType })
+                });
+                const data = await res.json();
+                if (data.success && data.invoiceLink) {
+                    window.open(data.invoiceLink, '_blank');
+                } else {
+                    alert(data.error || "Failed to create invoice");
+                }
+            } catch (err) { alert("Error connecting to payment gateway"); }
+        }
+
+        async function requestWithdrawal() {
+            const method = document.getElementById('withdrawMethod').value;
+            const account = document.getElementById('withdrawAccount').value;
+            const amount = document.getElementById('withdrawAmount').value;
+
+            if(!method || !account || !amount) { alert("Fill all withdrawal fields!"); return; }
+
+            try {
+                const res = await fetch(`${SERVER_URL}/api/withdraw`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ telegramId, method, account, amount })
+                });
+                const data = await res.json();
+                if(data.success) {
+                    alert(data.message);
+                    fetchUserData();
+                } else {
+                    alert(data.error);
+                }
+            } catch (err) { alert("Withdrawal request failed!"); }
+        }
+
+        async function handleChangePassword() {
+            const oldPassword = document.getElementById('oldPassword').value;
+            const newPassword = document.getElementById('newPassword').value;
+            if(!newPassword) { alert("Enter new password"); return; }
+
+            const res = await fetch(`${SERVER_URL}/api/change-password`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ telegramId, password })
+                body: JSON.stringify({ telegramId, oldPassword, newPassword })
             });
-            alert("Password updated!");
+            const data = await res.json();
+            if(data.success) {
+                alert("Password updated successfully!");
+            } else {
+                alert(data.error);
+            }
+        }
+
+        async function adminGiveCredit() {
+            const targetTelegramId = document.getElementById('adminTargetId').value;
+            const amount = document.getElementById('adminCreditAmount').value;
+
+            if(!targetTelegramId || !amount) { alert("Fill all fields!"); return; }
+
+            const res = await fetch(`${SERVER_URL}/api/admin/give-credit`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ telegramId, targetTelegramId, amount })
+            });
+            const data = await res.json();
+            if(data.success) {
+                alert(`Successfully sent points! New balance: ${data.newBalance}`);
+            } else {
+                alert(data.error);
+            }
         }
 
         async function init() {
