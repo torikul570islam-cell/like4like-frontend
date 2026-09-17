@@ -135,7 +135,6 @@
             
             <hr style="border-color: #334155; margin: 15px 0;">
             
-            <!-- জিমেইল সেভ করার অপশন -->
             <h4 style="color: #38bdf8; margin-bottom: 8px;">📧 Save / Update Gmail</h4>
             <input type="email" id="profileEmailInput" placeholder="Enter your gmail">
             <button class="btn" onclick="handleSaveEmail()" style="width: 100%; margin-top: 4px; margin-bottom: 15px; background: #3b82f6;">Save Email</button>
@@ -161,13 +160,17 @@
 
     <script>
         const SERVER_URL = "https://telegram-mini-app-8y39.onrender.com";
-        const ADMIN_ID = "8351272061"; // সার্ভারের অ্যাডমিন আইডি
+        const ADMIN_ID = "8351272061"; 
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        const telegramId = tg.initDataUnsafe?.user?.id ? tg.initDataUnsafe.user.id.toString() : "test_admin_123";
+        // ফিক্সড: টেলিগ্রাম ওয়েবঅ্যাপ অথবা লোকালস্টোরেজ থেকে আইডি নেওয়া
+        const telegramId = tg.initDataUnsafe?.user?.id?.toString() || localStorage.getItem('telegramId') || "test_admin_123";
+        
+        // রেফারেল প্যারামিটার হ্যান্ডেল করার জন্য
+        const urlParams = new URLSearchParams(window.location.search);
+        const referredBy = urlParams.get('start') || null;
 
-        // অ্যাডমিন চেক করে ট্যাব শো করা
         function checkAdminAccess(id) {
             if (id === ADMIN_ID) {
                 document.getElementById('adminTabBtn').style.display = 'block';
@@ -180,7 +183,7 @@
                 await fetch(`${SERVER_URL}/api/register`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ telegramId })
+                    body: JSON.stringify({ telegramId, referredBy })
                 });
             } catch (err) { console.error(err); }
         }
@@ -199,6 +202,7 @@
         }
 
         function logoutUser() {
+            localStorage.removeItem('telegramId');
             window.location.href = "login.html";
         }
 
@@ -227,7 +231,6 @@
             } catch (err) { console.error(err); }
         }
 
-        // জিমেইল সেভ করার ফাংশন
         async function handleSaveEmail() {
             const email = document.getElementById('profileEmailInput').value;
             if(!email) { alert("Please enter a valid email!"); return; }
@@ -248,7 +251,6 @@
             } catch (err) { alert("Server connection error!"); }
         }
 
-        // টাস্ক লিংক ক্লিক করলে সময় সার্ভারে রেকর্ড হবে
         async function handleTaskClick(taskId, link) {
             await fetch(`${SERVER_URL}/api/tasks/click`, {
                 method: 'POST',
@@ -258,7 +260,6 @@
             window.open(link, '_blank');
         }
 
-        // ৫ সেকেন্ড সময় ও টেলিগ্রাম মেম্বারশিপ যাচাই করে ভেরিফাই করা (/api/tasks/complete)
         async function verifyTask(taskId) {
             try {
                 const res = await fetch(`${SERVER_URL}/api/tasks/complete`, {
