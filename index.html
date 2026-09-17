@@ -28,7 +28,7 @@
 <body>
 
     <div class="header-container">
-        <h2>🔥 Sub4Sub App</h2>
+        <h2>🔥 Like4Like App</h2>
         <button class="menu-icon-btn" onclick="toggleMenu()">⋮</button>
         <div id="dropdownMenu" class="dropdown-menu">
             <button onclick="switchTab('add'); toggleMenu();">⚙️ Add Task</button>
@@ -62,15 +62,20 @@
         </div>
     </div>
 
-    <!-- ২. এড টাস্ক ট্যাব -->
+    <!-- ২. এড টাস্ক ট্যাব (স্ক্রিনশট অনুযায়ী সকল অপশনযুক্ত) -->
     <div id="tab-add" class="tab-content" style="display:none;">
         <div class="card">
             <h3 style="text-align: center; margin-bottom: 15px; color: #38bdf8;">📊 Add New Promotion</h3>
-            <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 15px;">
-                <button class="btn" style="background: #334155; text-align: left; padding: 10px;" onclick="selectPlatform('telegram', 'Channel Join')">📢 Telegram Channel Join</button>
-                <button class="btn" style="background: #334155; text-align: left; padding: 10px;" onclick="selectPlatform('youtube', 'YouTube Subscribe')">🔴 YouTube Subscribe</button>
-                <button class="btn" style="background: #334155; text-align: left; padding: 10px;" onclick="selectPlatform('youtube', 'YouTube Like')">👍 YouTube Like</button>
-                <button class="btn" style="background: #334155; text-align: left; padding: 10px;" onclick="selectPlatform('instagram', 'Instagram Followers')">👥 Instagram Followers</button>
+            <div style="display: flex; flex-direction: column; gap: 6px; margin-bottom: 15px;">
+                <button class="btn" style="background: #334155; text-align: left; padding: 9px;" onclick="selectPlatform('telegram', 'Channel Join')">📢 Telegram Channel Join</button>
+                <button class="btn" style="background: #334155; text-align: left; padding: 9px;" onclick="selectPlatform('youtube', 'YouTube Subscribe')">🔴 YouTube Subscribe</button>
+                <button class="btn" style="background: #334155; text-align: left; padding: 9px;" onclick="selectPlatform('youtube', 'YouTube Like')">👍 YouTube Like</button>
+                <button class="btn" style="background: #334155; text-align: left; padding: 9px;" onclick="selectPlatform('instagram', 'Instagram Likes')">👍 Instagram Likes</button>
+                <button class="btn" style="background: #334155; text-align: left; padding: 9px;" onclick="selectPlatform('instagram', 'Instagram Followers')">👥 Instagram Followers</button>
+                <button class="btn" style="background: #334155; text-align: left; padding: 9px;" onclick="selectPlatform('tiktok', 'TikTok Likes')">❤️ TikTok Likes</button>
+                <button class="btn" style="background: #334155; text-align: left; padding: 9px;" onclick="selectPlatform('tiktok', 'TikTok Followers')">👥 TikTok Followers</button>
+                <button class="btn" style="background: #334155; text-align: left; padding: 9px;" onclick="selectPlatform('facebook', 'Facebook Likes')">👍 Facebook Likes</button>
+                <button class="btn" style="background: #334155; text-align: left; padding: 9px;" onclick="selectPlatform('facebook', 'Facebook Followers')">👥 Facebook Followers</button>
             </div>
             <div style="background: #0f172a; padding: 12px; border-radius: 8px; border: 1px solid #475569;">
                 <p style="margin-top:0;"><b>Selected Type:</b> <span id="selected-type" style="color: #4ade80;">TELEGRAM - Channel Join</span></p>
@@ -78,7 +83,7 @@
                 <input type="hidden" id="taskType" value="Channel Join">
 
                 <label>Target Link / URL:</label>
-                <input type="text" id="taskLink" placeholder="https://...">
+                <input type="text" id="taskLink" placeholder="@channel_username or https://...">
 
                 <label>Reward per action (Points): (Min 5)</label>
                 <input type="number" id="taskReward" value="5" min="5">
@@ -106,9 +111,9 @@
         <div class="card">
             <h3 style="color: #f59e0b; text-align: center;">⭐ Buy Points with Telegram Stars</h3>
             <div style="display: flex; gap: 5px; margin-top: 10px;">
-                <button class="btn" style="background: #8b5cf6;" onclick="buyStarsPackage('small')">100 Pts (5 Stars)</button>
-                <button class="btn" style="background: #8b5cf6;" onclick="buyStarsPackage('medium')">500 Pts (20 Stars)</button>
-                <button class="btn" style="background: #8b5cf6;" onclick="buyStarsPackage('large')">1200 Pts (40 Stars)</button>
+                <button class="btn" style="background: #8b5cf6;" onclick="buyStarsPackage('small')">100 Pts (10 Stars)</button>
+                <button class="btn" style="background: #8b5cf6;" onclick="buyStarsPackage('medium')">500 Pts (40 Stars)</button>
+                <button class="btn" style="background: #8b5cf6;" onclick="buyStarsPackage('large')">1200 Pts (99 Stars)</button>
             </div>
         </div>
 
@@ -164,12 +169,15 @@
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        // ফিক্সড: টেলিগ্রাম ওয়েবঅ্যাপ অথবা লোকালস্টোরেজ থেকে আইডি নেওয়া
-        const telegramId = tg.initDataUnsafe?.user?.id?.toString() || localStorage.getItem('telegramId') || "test_admin_123";
-        
-        // রেফারেল প্যারামিটার হ্যান্ডেল করার জন্য
-        const urlParams = new URLSearchParams(window.location.search);
-        const referredBy = urlParams.get('start') || null;
+        // সিকিউরিটি আপডেট: কোনো টেস্ট আইডি না ধরে সরাসরি লগইন পেজে রিডাইরেক্ট করা হবে যদি আইডি না থাকে
+        let telegramId = tg.initDataUnsafe?.user?.id ? tg.initDataUnsafe.user.id.toString() : null;
+        if (!telegramId) {
+            telegramId = localStorage.getItem('telegramId');
+        }
+        if (!telegramId) {
+            alert("Unauthorized access! Please login first.");
+            window.location.href = "login.html";
+        }
 
         function checkAdminAccess(id) {
             if (id === ADMIN_ID) {
@@ -183,7 +191,7 @@
                 await fetch(`${SERVER_URL}/api/register`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ telegramId, referredBy })
+                    body: JSON.stringify({ telegramId })
                 });
             } catch (err) { console.error(err); }
         }
