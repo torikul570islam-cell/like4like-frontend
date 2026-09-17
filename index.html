@@ -62,7 +62,7 @@
         </div>
     </div>
 
-    <!-- ২. এড টাস্ক ট্যাব (স্ক্রিনশট অনুযায়ী সকল অপশনযুক্ত) -->
+    <!-- ২. এড টাস্ক ট্যাব -->
     <div id="tab-add" class="tab-content" style="display:none;">
         <div class="card">
             <h3 style="text-align: center; margin-bottom: 15px; color: #38bdf8;">📊 Add New Promotion</h3>
@@ -169,7 +169,6 @@
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        // সিকিউরিটি আপডেট: কোনো টেস্ট আইডি না ধরে সরাসরি লগইন পেজে রিডাইরেক্ট করা হবে যদি আইডি না থাকে
         let telegramId = tg.initDataUnsafe?.user?.id ? tg.initDataUnsafe.user.id.toString() : null;
         if (!telegramId) {
             telegramId = localStorage.getItem('telegramId');
@@ -188,10 +187,18 @@
 
         async function registerUser() {
             try {
+                // রেফারেল আইডি হ্যান্ডেল করার কোড (Telegram start_param বা URL থেকে)
+                const urlParams = new URLSearchParams(window.location.search);
+                let referredBy = urlParams.get('ref') || tg.initDataUnsafe?.start_param || localStorage.getItem('referredBy');
+                
+                if (referredBy && !localStorage.getItem('referredBy')) {
+                    localStorage.setItem('referredBy', referredBy);
+                }
+
                 await fetch(`${SERVER_URL}/api/register`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ telegramId })
+                    body: JSON.stringify({ telegramId, referredBy })
                 });
             } catch (err) { console.error(err); }
         }
