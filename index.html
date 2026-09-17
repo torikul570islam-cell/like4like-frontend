@@ -137,8 +137,13 @@
             <p><b>Gmail:</b> <span id="profile-email" style="color: #eab308;">Not Set</span></p>
             <p><b>Total Balance:</b> <span id="profile-points" style="color: #4ade80;"></span> Points</p>
             <p><b>Star Balance:</b> <span id="profile-stars" style="color: #f59e0b;"></span> Stars</p>
+            <p><b>Total Referrals:</b> <span id="profile-ref-count" style="color: #38bdf8;">0</span></p>
             
             <hr style="border-color: #334155; margin: 15px 0;">
+
+            <h4 style="color: #38bdf8; margin-bottom: 8px;">🔗 Your Referral Link</h4>
+            <input type="text" id="profileRefLink" readonly style="background: #0f172a; color: #38bdf8; font-size: 11px;">
+            <button class="btn" onclick="copyRefLink()" style="width: 100%; margin-top: 4px; margin-bottom: 15px; background: #8b5cf6;">Copy Referral Link</button>
             
             <h4 style="color: #38bdf8; margin-bottom: 8px;">📧 Save / Update Gmail</h4>
             <input type="email" id="profileEmailInput" placeholder="Enter your gmail">
@@ -166,6 +171,7 @@
     <script>
         const SERVER_URL = "https://telegram-mini-app-8y39.onrender.com";
         const ADMIN_ID = "8351272061"; 
+        const BOT_USERNAME = "YourBotUsername"; // আপনার টেলিগ্রাম বটের ইউজারনেম এখানে বসাবেন (যেমন: Like4LikeBot)
         const tg = window.Telegram.WebApp;
         tg.expand();
 
@@ -187,7 +193,6 @@
 
         async function registerUser() {
             try {
-                // রেফারেল আইডি হ্যান্ডেল করার কোড (Telegram start_param বা URL থেকে)
                 const urlParams = new URLSearchParams(window.location.search);
                 let referredBy = urlParams.get('ref') || tg.initDataUnsafe?.start_param || localStorage.getItem('referredBy');
                 
@@ -237,13 +242,26 @@
                 document.getElementById('profile-stars').innerText = data.stars || 0;
                 document.getElementById('profile-id').innerText = data.telegramId;
                 document.getElementById('profile-email').innerText = data.email || "Not Set";
+                document.getElementById('profile-ref-count').innerText = data.referralCount || 0;
                 
+                // রেফারেল লিংক জেনারেট করা
+                const refLink = `https://t.me/${BOT_USERNAME}?start=${data.telegramId}`;
+                document.getElementById('profileRefLink').value = refLink;
+
                 if(data.email) {
                     document.getElementById('profileEmailInput').value = data.email;
                 }
 
                 checkAdminAccess(data.telegramId);
             } catch (err) { console.error(err); }
+        }
+
+        function copyRefLink() {
+            const refInput = document.getElementById('profileRefLink');
+            refInput.select();
+            refInput.setSelectionRange(0, 99999);
+            navigator.clipboard.writeText(refInput.value);
+            alert("Referral link copied to clipboard!");
         }
 
         async function handleSaveEmail() {
@@ -437,7 +455,7 @@
             const res = await fetch(`${SERVER_URL}/api/change-password`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ telegramId, oldPassword, newPassword })
+                body: JSON.xml ? JSON.stringify({ telegramId, oldPassword, newPassword }) : JSON.stringify({ telegramId, oldPassword, newPassword })
             });
             const data = await res.json();
             if(data.success) {
