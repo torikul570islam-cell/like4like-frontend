@@ -23,10 +23,10 @@
     <div class="login-card">
         <h2>🔐 Website Login</h2>
         <label>Telegram ID or Gmail:</label>
-        <input type="text" id="loginIdentifier" placeholder="Enter telegram id or gmail"[cite: 11]>
+        <input type="text" id="loginIdentifier" placeholder="Enter telegram id or gmail">
         
         <label>Password:</label>
-        <input type="password" id="loginPassword" placeholder="Enter your password"[cite: 11]>
+        <input type="password" id="loginPassword" placeholder="Enter your password">
         
         <button class="btn" onclick="webLogin()">Login</button>
         <button class="forgot-btn" onclick="forgotPassword()">Forgot Password?</button>
@@ -36,7 +36,6 @@
     </div>
 
     <script>
-        // আপনার Render ব্যাকএন্ড সার্ভারের লিংক
         const SERVER_URL = "https://telegram-mini-app-8y39.onrender.com";
 
         async function webLogin() {
@@ -53,7 +52,6 @@
                 return;
             }
 
-            // ব্যাকএন্ডের সাথে সামঞ্জস্য রাখতে identifier-কে telegramId বা email হিসেবে পাঠানো হচ্ছে
             const requestBody = identifier.includes('@') 
                 ? { identifier, password } 
                 : { telegramId: identifier, password };
@@ -92,9 +90,8 @@
                 return;
             }
 
-            const requestBody = identifier.includes('@') 
-                ? { email: identifier } 
-                : { telegramId: identifier };
+            // ফিক্সড: ব্যাকএন্ডের সাথে মিল রেখে identifier পাঠানো হচ্ছে
+            const requestBody = { identifier: identifier };
 
             try {
                 successMsg.innerText = "Sending new password...";
