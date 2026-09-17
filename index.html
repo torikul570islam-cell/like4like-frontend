@@ -134,6 +134,12 @@
             <p><b>Star Balance:</b> <span id="profile-stars" style="color: #f59e0b;"></span> Stars</p>
             
             <hr style="border-color: #334155; margin: 15px 0;">
+            
+            <!-- জিমেইল সেভ করার অপশন -->
+            <h4 style="color: #38bdf8; margin-bottom: 8px;">📧 Save / Update Gmail</h4>
+            <input type="email" id="profileEmailInput" placeholder="Enter your gmail">
+            <button class="btn" onclick="handleSaveEmail()" style="width: 100%; margin-top: 4px; margin-bottom: 15px; background: #3b82f6;">Save Email</button>
+
             <h4 style="color: #38bdf8; margin-bottom: 8px;">🔐 Change Password</h4>
             <input type="password" id="oldPassword" placeholder="Old Password (leave blank if none)">
             <input type="password" id="newPassword" placeholder="New Password">
@@ -212,9 +218,34 @@
                 document.getElementById('profile-stars').innerText = data.stars || 0;
                 document.getElementById('profile-id').innerText = data.telegramId;
                 document.getElementById('profile-email').innerText = data.email || "Not Set";
+                
+                if(data.email) {
+                    document.getElementById('profileEmailInput').value = data.email;
+                }
 
                 checkAdminAccess(data.telegramId);
             } catch (err) { console.error(err); }
+        }
+
+        // জিমেইল সেভ করার ফাংশন
+        async function handleSaveEmail() {
+            const email = document.getElementById('profileEmailInput').value;
+            if(!email) { alert("Please enter a valid email!"); return; }
+
+            try {
+                const res = await fetch(`${SERVER_URL}/api/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ telegramId, email })
+                });
+                const data = await res.json();
+                if(data.success) {
+                    alert("Email saved successfully!");
+                    fetchUserData();
+                } else {
+                    alert(data.error || "Failed to save email");
+                }
+            } catch (err) { alert("Server connection error!"); }
         }
 
         // টাস্ক লিংক ক্লিক করলে সময় সার্ভারে রেকর্ড হবে
